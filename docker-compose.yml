@@ -1,0 +1,303 @@
+version: '3.8'
+
+services:
+  # =====================
+  # Message Queue
+  # =====================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: habit-tracker-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - habit-tracker
+
+  # =====================
+  # MongoDB Instances (one per service)
+  # =====================
+  mongodb-users:
+    image: mongo:7
+    container_name: habit-tracker-mongo-users
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-users-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - habit-tracker
+
+  mongodb-habits:
+    image: mongo:7
+    container_name: habit-tracker-mongo-habits
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-habits-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - habit-tracker
+
+  mongodb-tracking:
+    image: mongo:7
+    container_name: habit-tracker-mongo-tracking
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo-tracking-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - habit-tracker
+
+  mongodb-analytics:
+    image: mongo:7
+    container_name: habit-tracker-mongo-analytics
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo-analytics-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - habit-tracker
+
+  mongodb-notifications:
+    image: mongo:7
+    container_name: habit-tracker-mongo-notifications
+    ports:
+      - "27021:27017"
+    volumes:
+      - mongo-notifications-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - habit-tracker
+
+  # =====================
+  # Microservices
+  # =====================
+  user-service:
+    build:
+      context: .
+      dockerfile: services/user-service/Dockerfile
+    container_name: habit-tracker-user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb-users:27017/habit-tracker-users
+      - JWT_SECRET=habit-tracker-secret-key-change-in-production
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      mongodb-users:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - habit-tracker
+
+  habit-service:
+    build:
+      context: .
+      dockerfile: services/habit-service/Dockerfile
+    container_name: habit-tracker-habit-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - MONGODB_URI=mongodb://mongodb-habits:27017/habit-tracker-habits
+      - JWT_SECRET=habit-tracker-secret-key-change-in-production
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      mongodb-habits:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - habit-tracker
+
+  tracking-service:
+    build:
+      context: .
+      dockerfile: services/tracking-service/Dockerfile
+    container_name: habit-tracker-tracking-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - MONGODB_URI=mongodb://mongodb-tracking:27017/habit-tracker-tracking
+      - JWT_SECRET=habit-tracker-secret-key-change-in-production
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      mongodb-tracking:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - habit-tracker
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: services/analytics-service/Dockerfile
+    container_name: habit-tracker-analytics-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - MONGODB_URI=mongodb://mongodb-analytics:27017/habit-tracker-analytics
+      - JWT_SECRET=habit-tracker-secret-key-change-in-production
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      mongodb-analytics:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - habit-tracker
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    container_name: habit-tracker-notification-service
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=production
+      - PORT=3005
+      - MONGODB_URI=mongodb://mongodb-notifications:27017/habit-tracker-notifications
+      - JWT_SECRET=habit-tracker-secret-key-change-in-production
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      mongodb-notifications:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - habit-tracker
+
+  # =====================
+  # API Gateway
+  # =====================
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    container_name: habit-tracker-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=habit-tracker-secret-key-change-in-production
+      - USER_SERVICE_URL=http://user-service:3001
+      - HABIT_SERVICE_URL=http://habit-service:3002
+      - TRACKING_SERVICE_URL=http://tracking-service:3003
+      - ANALYTICS_SERVICE_URL=http://analytics-service:3004
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3005
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+    depends_on:
+      - user-service
+      - habit-service
+      - tracking-service
+      - analytics-service
+      - notification-service
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - habit-tracker
+
+  # =====================
+  # Frontend (Optional)
+  # =====================
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: habit-tracker-frontend
+    ports:
+      - "80:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3000
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - habit-tracker
+
+# =====================
+# Volumes
+# =====================
+volumes:
+  mongo-users-data:
+  mongo-habits-data:
+  mongo-tracking-data:
+  mongo-analytics-data:
+  mongo-notifications-data:
+
+# =====================
+# Networks
+# =====================
+networks:
+  habit-tracker:
+    driver: bridge
