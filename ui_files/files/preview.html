@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HabitFlow – UI Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500@display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#00C896;--primary-dark:#00A07A;--primary-glow:rgba(0,200,150,.15);
+  --accent:#7C5CFC;--danger:#FF4757;--warning:#FFB444;
+  --bg-base:#0A0E1A;--bg-surface:#111827;--bg-elevated:#1A2236;--bg-card:#1E2A40;--bg-hover:#263247;
+  --text-primary:#F0F4FF;--text-secondary:#8896B3;--text-muted:#4A5568;
+  --border:rgba(255,255,255,.06);--border-hover:rgba(255,255,255,.12);
+  --shadow-md:0 8px 24px rgba(0,0,0,.4);--shadow-lg:0 20px 60px rgba(0,0,0,.5);
+  --shadow-glow:0 0 40px rgba(0,200,150,.12);
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:24px;--r-full:9999px;
+  --tr:.25s cubic-bezier(.4,0,.2,1);--tr-bounce:.4s cubic-bezier(.34,1.56,.64,1);
+}
+html{font-family:'DM Sans',sans-serif;background:var(--bg-base);color:var(--text-primary);line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(0,200,150,.08),transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(124,92,252,.06),transparent 60%);pointer-events:none;z-index:0}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.8);opacity:0}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes slideLeft{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+
+/* PREVIEW FRAME */
+.preview-wrapper{max-width:1100px;margin:0 auto;padding:1rem;position:relative;z-index:1}
+.preview-tabs{display:flex;gap:4px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-full);padding:4px;width:fit-content;margin-bottom:1.5rem;animation:fadeUp .4s ease}
+.tab-btn{padding:.4rem 1.1rem;border:none;border-radius:var(--r-full);font-size:.85rem;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:var(--tr);background:transparent;color:var(--text-secondary)}
+.tab-btn:hover{color:var(--text-primary)}
+.tab-btn.active{background:var(--primary);color:#0A0E1A;font-weight:600;box-shadow:0 0 16px var(--primary-glow)}
+.view{display:none;animation:slideLeft .3s ease}.view.active{display:block}
+
+/* HEADER */
+.header{background:rgba(10,14,26,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 1.5rem;border-radius:var(--r-lg) var(--r-lg) 0 0;position:relative;margin-bottom:0}
+.header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--primary),transparent);opacity:.4}
+.header-content{display:flex;justify-content:space-between;align-items:center;height:56px}
+.header-logo{display:flex;align-items:center;gap:8px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px var(--primary-glow)}
+.logo-text{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;background:linear-gradient(90deg,#fff,var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header-nav{display:flex;gap:3px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-full);padding:3px}
+.nav-link{color:var(--text-secondary);text-decoration:none;padding:.35rem .9rem;border-radius:var(--r-full);font-size:.8rem;font-weight:500;transition:var(--tr);cursor:pointer;border:none;background:transparent;font-family:'DM Sans',sans-serif}
+.nav-link:hover{color:var(--text-primary)}
+.nav-link.active{background:var(--primary);color:#0A0E1A;font-weight:600;box-shadow:0 0 12px var(--primary-glow)}
+.header-right{display:flex;align-items:center;gap:8px}
+.user-badge{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-full)}
+.user-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#0A0E1A}
+.user-name{font-size:.75rem;color:var(--text-secondary);font-weight:500}
+.btn-logout-demo{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:.35rem .8rem;border-radius:var(--r-full);cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif;transition:var(--tr)}
+.btn-logout-demo:hover{border-color:var(--danger);color:var(--danger);background:rgba(255,71,87,.08)}
+
+/* PAGE BODY */
+.page-body{background:var(--bg-surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r-lg) var(--r-lg);padding:1.5rem;min-height:420px}
+
+/* CARDS */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem;margin-bottom:1rem;transition:var(--tr);position:relative;overflow:hidden;animation:fadeUp .4s ease both}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
+.card:hover{border-color:var(--border-hover);transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:1rem;color:var(--text-primary);letter-spacing:-.01em}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.25rem}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);padding:1rem;border-radius:var(--r-lg);transition:var(--tr);animation:fadeUp .4s ease both;position:relative;overflow:hidden}
+.stat-card:nth-child(1){animation-delay:.05s}.stat-card:nth-child(2){animation-delay:.1s}.stat-card:nth-child(3){animation-delay:.15s}.stat-card:nth-child(4){animation-delay:.2s}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),var(--accent));transform:scaleX(0);transform-origin:left;transition:transform .4s ease}
+.stat-card:hover{border-color:var(--border-hover);transform:translateY(-3px);box-shadow:var(--shadow-md),var(--shadow-glow)}
+.stat-card:hover::after{transform:scaleX(1)}
+.stat-icon{font-size:1.1rem;margin-bottom:.5rem;display:block}
+.stat-value{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--primary);line-height:1;margin-bottom:.2rem;letter-spacing:-.04em}
+.stat-label{color:var(--text-secondary);font-size:.72rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+
+/* PROGRESS BAR */
+.progress-bar{height:4px;background:var(--border);border-radius:var(--r-full);overflow:hidden;margin-top:.4rem}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:var(--r-full);transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+
+/* HABIT LIST */
+.habit-list{display:flex;flex-direction:column;gap:.5rem}
+.habit-item{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-md);transition:var(--tr);animation:fadeUp .3s ease both;position:relative;overflow:hidden;cursor:pointer}
+.habit-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--hcolor,var(--primary));border-radius:3px 0 0 3px;opacity:0;transition:opacity .2s}
+.habit-item:hover{border-color:var(--border-hover);background:var(--bg-hover);transform:translateX(4px)}
+.habit-item:hover::before{opacity:1}
+.habit-item.done{border-color:rgba(0,200,150,.15);background:rgba(0,200,150,.03)}
+.habit-info{display:flex;align-items:center;gap:.75rem}
+.habit-dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 8px currentColor;flex-shrink:0}
+.habit-name{font-weight:500;color:var(--text-primary);font-size:.9rem}
+.habit-type-label{font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.habit-name.struck{text-decoration:line-through;opacity:.5}
+
+/* CUSTOM CHECKBOX */
+.cb-wrap{display:flex;align-items:center;gap:6px;cursor:pointer}
+.cb-box{width:22px;height:22px;border:2px solid var(--border-hover);border-radius:5px;display:flex;align-items:center;justify-content:center;transition:var(--tr-bounce);background:transparent;flex-shrink:0}
+.cb-wrap:hover .cb-box{border-color:var(--primary);background:var(--primary-glow)}
+.cb-box.checked{background:var(--primary);border-color:var(--primary);box-shadow:0 0 14px var(--primary-glow);transform:scale(1.1)}
+.cb-label{font-size:.78rem;color:var(--text-secondary);font-weight:500}
+.checkmark{stroke:#0A0E1A;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;fill:none;stroke-dasharray:30;stroke-dashoffset:30;transition:stroke-dashoffset .3s ease}
+.cb-box.checked .checkmark{stroke-dashoffset:0}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--r-full);font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.badge-green{background:rgba(0,200,150,.12);color:var(--primary);border:1px solid rgba(0,200,150,.2)}
+.badge-purple{background:rgba(124,92,252,.12);color:var(--accent);border:1px solid rgba(124,92,252,.2)}
+.badge-red{background:rgba(255,71,87,.12);color:var(--danger);border:1px solid rgba(255,71,87,.2)}
+.badge-amber{background:rgba(255,180,68,.12);color:var(--warning);border:1px solid rgba(255,180,68,.2)}
+
+/* PAGE HEADER */
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;animation:fadeUp .4s ease}
+.page-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--text-primary);letter-spacing:-.03em}
+.page-sub{font-size:.8rem;color:var(--text-secondary);margin-top:2px}
+
+/* BTNS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:.55rem 1.1rem;border:none;border-radius:var(--r-md);font-size:.82rem;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:var(--tr-bounce);text-decoration:none;position:relative}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#00B887);color:#0A0E1A;font-weight:600;box-shadow:0 4px 16px rgba(0,200,150,.25)}
+.btn-primary:hover{box-shadow:0 8px 24px rgba(0,200,150,.4);transform:translateY(-2px)}
+.btn-secondary{background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--bg-hover);color:var(--text-primary)}
+.btn-danger-sm{background:rgba(255,71,87,.1);color:var(--danger);border:1px solid rgba(255,71,87,.2);padding:.3rem .7rem;border-radius:var(--r-sm);font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:var(--tr)}
+.btn-danger-sm:hover{background:rgba(255,71,87,.2)}
+.btn-sm{padding:.35rem .8rem;font-size:.75rem;border-radius:var(--r-sm)}
+
+/* HEATMAP */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.hcell{aspect-ratio:1;border-radius:3px;background:var(--bg-elevated);border:1px solid var(--border);transition:var(--tr);cursor:pointer}
+.hcell:hover{transform:scale(1.4);z-index:1;position:relative}
+.hcell.i1{background:rgba(0,200,150,.2);border-color:rgba(0,200,150,.3)}.hcell.i2{background:rgba(0,200,150,.4);border-color:rgba(0,200,150,.5)}.hcell.i3{background:rgba(0,200,150,.65);border-color:rgba(0,200,150,.7)}.hcell.i4{background:var(--primary);border-color:var(--primary);box-shadow:0 0 8px var(--primary-glow)}
+
+/* NOTIFICATION ITEMS */
+.notif-item{display:flex;align-items:flex-start;gap:.75rem;padding:.85rem 1rem;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-md);transition:var(--tr);animation:fadeUp .3s ease both;cursor:pointer;margin-bottom:.5rem}
+.notif-item:hover{border-color:var(--border-hover);background:var(--bg-hover)}
+.notif-item.unread{border-left:3px solid var(--primary);background:rgba(0,200,150,.04)}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);margin-top:5px;flex-shrink:0;box-shadow:0 0 8px var(--primary-glow);position:relative}
+.notif-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;background:var(--primary);opacity:.3;animation:pulse-ring 1.5s ease-out infinite}
+.notif-title{font-weight:600;font-size:.85rem;color:var(--text-primary);margin-bottom:2px}
+.notif-msg{color:var(--text-secondary);font-size:.78rem;line-height:1.5}
+.notif-time{font-size:.68rem;color:var(--text-muted);margin-top:5px}
+
+/* AUTH */
+.auth-bg{min-height:380px;display:flex;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 100% 70% at 50% -10%,rgba(0,200,150,.12),transparent 70%)}
+.auth-card-demo{background:var(--bg-card);border:1px solid var(--border);padding:2rem;border-radius:var(--r-xl);width:100%;max-width:360px;box-shadow:var(--shadow-lg);animation:scaleIn .5s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+.auth-card-demo::before{content:'';position:absolute;top:-50px;left:-50px;width:160px;height:160px;background:radial-gradient(circle,var(--primary-glow),transparent 70%);pointer-events:none}
+.auth-logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 8px 24px rgba(0,200,150,.3);animation:float 3s ease-in-out infinite;margin:0 auto .75rem}
+.auth-card-demo h2{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;text-align:center;color:var(--text-primary);letter-spacing:-.03em;margin-bottom:.3rem}
+.auth-card-demo p{text-align:center;color:var(--text-secondary);font-size:.82rem;margin-bottom:1.5rem}
+.form-label{display:block;margin-bottom:.35rem;font-size:.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em}
+.form-input{width:100%;padding:.65rem .9rem;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-md);font-size:.88rem;font-family:'DM Sans',sans-serif;color:var(--text-primary);outline:none;transition:var(--tr);margin-bottom:.9rem}
+.form-input:focus{border-color:var(--primary);background:var(--bg-elevated);box-shadow:0 0 0 3px var(--primary-glow)}
+.form-input::placeholder{color:var(--text-muted)}
+.auth-footer-demo{text-align:center;margin-top:1rem;color:var(--text-muted);font-size:.8rem}
+.auth-footer-demo a{color:var(--primary);text-decoration:none;font-weight:500}
+
+/* INSIGHTS */
+.insight-item{display:flex;align-items:center;gap:8px;padding:.7rem .9rem;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-sm);font-size:.82rem;color:var(--text-secondary);transition:var(--tr);margin-bottom:.4rem;animation:fadeUp .3s ease both}
+.insight-item:hover{border-color:var(--border-hover);color:var(--text-primary)}
+.insight-item::before{content:'✦';color:var(--primary);font-size:.6rem;flex-shrink:0}
+
+/* DAY CARDS */
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem}
+.day-card{padding:.7rem .5rem;border-radius:var(--r-md);text-align:center;background:var(--bg-elevated);border:1px solid var(--border);transition:var(--tr)}
+.day-card.best{background:rgba(0,200,150,.08);border-color:rgba(0,200,150,.3);box-shadow:0 0 16px var(--primary-glow)}
+.day-card:hover{transform:translateY(-2px)}
+.day-name{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:3px}
+.day-val{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--primary)}
+
+/* EMPTY STATE */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem;gap:.5rem}
+.empty-icon{font-size:2.5rem;opacity:.4;margin-bottom:.25rem}
+.empty-title{font-family:'Syne',sans-serif;font-weight:700;color:var(--text-secondary);font-size:.95rem}
+.empty-text{color:var(--text-muted);font-size:.8rem;text-align:center}
+
+/* TREND */
+.trend-indicator{display:flex;align-items:center;gap:.75rem;padding:.9rem 1rem;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--r-md)}
+.trend-icon-box{width:40px;height:40px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:rgba(0,200,150,.1)}
+</style>
+</head>
+<body>
+<div class="preview-wrapper">
+
+  <!-- TAB BAR -->
+  <div class="preview-tabs">
+    <button class="tab-btn active" onclick="showTab('dashboard')">Dashboard</button>
+    <button class="tab-btn" onclick="showTab('habits')">Habits</button>
+    <button class="tab-btn" onclick="showTab('analytics')">Analytics</button>
+    <button class="tab-btn" onclick="showTab('notifications')">Notifications</button>
+    <button class="tab-btn" onclick="showTab('auth')">Auth</button>
+  </div>
+
+  <!-- SHARED HEADER -->
+  <div class="header" id="main-header">
+    <div class="header-content">
+      <div class="header-logo">
+        <div class="logo-icon">🎯</div>
+        <span class="logo-text">HabitFlow</span>
+      </div>
+      <nav class="header-nav" id="header-nav">
+        <button class="nav-link active" onclick="showTab('dashboard');setActive(this)">Dashboard</button>
+        <button class="nav-link" onclick="showTab('habits');setActive(this)">Habits</button>
+        <button class="nav-link" onclick="showTab('analytics');setActive(this)">Analytics</button>
+        <button class="nav-link" onclick="showTab('notifications');setActive(this)">Alerts</button>
+      </nav>
+      <div class="header-right">
+        <div class="user-badge">
+          <div class="user-avatar">AJ</div>
+          <span class="user-name">Alex</span>
+        </div>
+        <button class="btn-logout-demo">Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEWS -->
+
+  <!-- DASHBOARD -->
+  <div class="page-body view active" id="view-dashboard">
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">Today's Dashboard</h2>
+        <p class="page-sub">Sunday, April 5, 2026</p>
+      </div>
+      <span class="badge badge-green">🔥 On streak!</span>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><span class="stat-icon">📋</span><div class="stat-value">6</div><div class="stat-label">Today's Habits</div></div>
+      <div class="stat-card"><span class="stat-icon">✅</span><div class="stat-value">4</div><div class="stat-label">Completed</div></div>
+      <div class="stat-card"><span class="stat-icon">📊</span><div class="stat-value">78%</div><div class="stat-label">Weekly Rate</div><div class="progress-bar"><div class="progress-fill" style="width:78%"></div></div></div>
+      <div class="stat-card"><span class="stat-icon">🔥</span><div class="stat-value">12</div><div class="stat-label">Day Streak</div></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div class="card-title" style="margin-bottom:0">Today's Progress</div>
+        <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--primary)">67%</span>
+      </div>
+      <div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:67%"></div></div>
+      <p style="font-size:.72rem;color:var(--text-muted);margin-top:.4rem">4 of 6 habits completed</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Today's Habits</div>
+      <div class="habit-list" id="habit-checklist"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">✦ Insights</div>
+      <div class="insight-item" style="animation-delay:.05s">Your best time to complete habits is before 9 AM</div>
+      <div class="insight-item" style="animation-delay:.1s">You're 23% more consistent on weekdays than weekends</div>
+      <div class="insight-item" style="animation-delay:.15s">Meditation has your highest 30-day streak at 18 days</div>
+    </div>
+  </div>
+
+  <!-- HABITS -->
+  <div class="page-body view" id="view-habits">
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">My Habits</h2>
+        <p class="page-sub">6 habits tracked</p>
+      </div>
+      <button class="btn btn-primary">+ New Habit</button>
+    </div>
+
+    <div class="card" style="border-color:rgba(0,200,150,.15)">
+      <div class="card-title">Create New Habit</div>
+      <div style="margin-bottom:.9rem">
+        <div class="form-label">Habit Name</div>
+        <input class="form-input" placeholder="e.g., Morning Meditation" />
+      </div>
+      <div style="margin-bottom:.9rem">
+        <div class="form-label">Type</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem">
+          <div style="padding:.6rem .4rem;border:1px solid var(--primary);border-radius:var(--r-md);cursor:pointer;background:rgba(0,200,150,.08);text-align:center">
+            <div style="font-size:1rem;margin-bottom:2px">✓</div>
+            <div style="font-weight:600;font-size:.72rem;color:var(--primary)">Yes / No</div>
+            <div style="font-size:.62rem;color:var(--text-muted)">Did you do it?</div>
+          </div>
+          <div style="padding:.6rem .4rem;border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;background:var(--bg-elevated);text-align:center">
+            <div style="font-size:1rem;margin-bottom:2px">#</div>
+            <div style="font-weight:600;font-size:.72rem;color:var(--text-primary)">Count</div>
+            <div style="font-size:.62rem;color:var(--text-muted)">How many?</div>
+          </div>
+          <div style="padding:.6rem .4rem;border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;background:var(--bg-elevated);text-align:center">
+            <div style="font-size:1rem;margin-bottom:2px">⏱</div>
+            <div style="font-weight:600;font-size:.72rem;color:var(--text-primary)">Duration</div>
+            <div style="font-size:.62rem;color:var(--text-muted)">How long?</div>
+          </div>
+          <div style="padding:.6rem .4rem;border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;background:var(--bg-elevated);text-align:center">
+            <div style="font-size:1rem;margin-bottom:2px">✗</div>
+            <div style="font-weight:600;font-size:.72rem;color:var(--text-primary)">Avoid</div>
+            <div style="font-size:.62rem;color:var(--text-muted)">Break habit</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.9rem">
+        <div style="flex:1">
+          <div class="form-label">Schedule</div>
+          <input class="form-input" value="Every Day" style="margin-bottom:0" readonly />
+        </div>
+        <div>
+          <div class="form-label">Color</div>
+          <div style="display:flex;gap:6px">
+            ${['#00C896','#7C5CFC','#FF4757','#FFB444','#00B4D8','#F72585'].map((c,i)=>`<div style="width:22px;height:22px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${i===0?'white':'transparent'};transition:.2s;box-shadow:${i===0?`0 0 10px ${c}`:'none'}"></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="padding:.6rem 1.2rem">+ Create Habit</button>
+    </div>
+
+    <div class="habit-list" id="habits-page-list"></div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="page-body view" id="view-analytics">
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">Analytics</h2>
+        <p class="page-sub">Last 30 days performance</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Trend Overview</div>
+      <div class="trend-indicator">
+        <div class="trend-icon-box">📈</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">Improving</span>
+            <span class="badge badge-green">improving</span>
+          </div>
+          <p style="font-size:.8rem;color:var(--text-secondary)">You're on the right track! Keep it up.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Activity Heatmap</div>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-bottom:.75rem">Last 3 months · Hover cells for details</p>
+      <div class="heatmap" id="heatmap-grid"></div>
+      <div style="display:flex;gap:6px;margin-top:.6rem;font-size:.68rem;color:var(--text-muted);align-items:center">
+        <span>Less</span>
+        <div style="display:flex;gap:3px">
+          <div style="width:11px;height:11px;border-radius:2px;background:var(--bg-elevated);border:1px solid var(--border)"></div>
+          <div style="width:11px;height:11px;border-radius:2px;background:rgba(0,200,150,.2)"></div>
+          <div style="width:11px;height:11px;border-radius:2px;background:rgba(0,200,150,.4)"></div>
+          <div style="width:11px;height:11px;border-radius:2px;background:rgba(0,200,150,.65)"></div>
+          <div style="width:11px;height:11px;border-radius:2px;background:var(--primary)"></div>
+        </div>
+        <span>More</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Best Performing Days</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:.75rem .9rem;background:rgba(0,200,150,.06);border:1px solid rgba(0,200,150,.2);border-radius:var(--r-md);margin-bottom:1rem">
+        <span style="font-size:1.25rem">🏆</span>
+        <div>
+          <span style="font-weight:600">Tuesday</span>
+          <span style="color:var(--text-secondary);font-size:.82rem"> is your best day with </span>
+          <span style="color:var(--primary);font-weight:700">92%</span>
+          <span style="color:var(--text-secondary);font-size:.82rem"> avg completion</span>
+        </div>
+      </div>
+      <div class="day-grid" id="day-grid"></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="page-body view" id="view-notifications">
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h2 class="page-title">Notifications</h2>
+        <span class="badge badge-green" style="font-size:.78rem;padding:3px 10px">3 new</span>
+      </div>
+      <button class="btn btn-secondary btn-sm">Mark all read</button>
+    </div>
+    <div id="notifications-list"></div>
+  </div>
+
+  <!-- AUTH -->
+  <div class="page-body view" id="view-auth" style="background:transparent;border:none;padding:0">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+      <!-- Login -->
+      <div class="auth-bg" style="border-radius:var(--r-lg);border:1px solid var(--border)">
+        <div class="auth-card-demo">
+          <div class="auth-logo-icon">🎯</div>
+          <h2>Welcome back</h2>
+          <p>Sign in to continue your streak</p>
+          <div class="form-label">Email</div>
+          <input class="form-input" placeholder="you@example.com" type="email" />
+          <div class="form-label">Password</div>
+          <input class="form-input" placeholder="••••••••" type="password" style="margin-bottom:1rem" />
+          <button class="btn btn-primary" style="width:100%;padding:.75rem;font-size:.95rem">Sign In →</button>
+          <div class="auth-footer-demo">Don't have an account? <a href="#">Create one free</a></div>
+        </div>
+      </div>
+      <!-- Signup -->
+      <div class="auth-bg" style="border-radius:var(--r-lg);border:1px solid var(--border)">
+        <div class="auth-card-demo">
+          <div class="auth-logo-icon" style="animation-delay:.3s">🎯</div>
+          <h2>Start your journey</h2>
+          <p>Build habits that stick</p>
+          <div class="form-label">Full Name</div>
+          <input class="form-input" placeholder="Alex Johnson" />
+          <div class="form-label">Email</div>
+          <input class="form-input" placeholder="you@example.com" type="email" />
+          <div class="form-label">Password</div>
+          <input class="form-input" placeholder="At least 6 characters" type="password" style="margin-bottom:.25rem" />
+          <div class="progress-bar" style="margin-bottom:.85rem"><div class="progress-fill" style="width:40%"></div></div>
+          <button class="btn btn-primary" style="width:100%;padding:.75rem;font-size:.95rem">Create Account →</button>
+          <div class="auth-footer-demo">Already have an account? <a href="#">Sign in</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const HABITS = [
+  { name:'Morning Meditation', type:'binary', color:'#00C896', done:true },
+  { name:'Read 30 Minutes',    type:'binary', color:'#7C5CFC', done:true },
+  { name:'Drink 8 Glasses',    type:'count',  color:'#00B4D8', done:true },
+  { name:'Exercise',           type:'time',   color:'#FFB444', done:true },
+  { name:'No Social Media',    type:'negative',color:'#FF4757',done:false },
+  { name:'Journal Entry',      type:'binary', color:'#F72585', done:false },
+];
+
+function makeCheckbox(done) {
+  return `<div class="cb-wrap" onclick="toggleHabit(this)">
+    <div class="cb-box ${done?'checked':''}">
+      <svg width="11" height="9" viewBox="0 0 11 9"><polyline class="checkmark" points="1,4.5 4,7.5 10,1"/></svg>
+    </div>
+    <span class="cb-label">${done?'Done':'Mark done'}</span>
+  </div>`;
+}
+
+function toggleHabit(wrap) {
+  const box = wrap.querySelector('.cb-box');
+  const lbl = wrap.querySelector('.cb-label');
+  const item = wrap.closest('.habit-item');
+  const nameEl = item?.querySelector('.habit-name');
+  const checked = box.classList.toggle('checked');
+  lbl.textContent = checked ? 'Done' : 'Mark done';
+  if (nameEl) nameEl.classList.toggle('struck', checked);
+  if (item) item.classList.toggle('done', checked);
+}
+
+function renderHabits() {
+  // Dashboard list
+  const cl = document.getElementById('habit-checklist');
+  if (cl) cl.innerHTML = HABITS.map((h,i) => `
+    <div class="habit-item ${h.done?'done':''}" style="--hcolor:${h.color};animation-delay:${i*.05}s">
+      <div class="habit-info">
+        <div class="habit-dot" style="background:${h.color};color:${h.color}"></div>
+        <div>
+          <div class="habit-name ${h.done?'struck':''}">${h.name}</div>
+          <div class="habit-type-label">${h.type}</div>
+        </div>
+      </div>
+      ${makeCheckbox(h.done)}
+    </div>`).join('');
+
+  // Habits page list
+  const pl = document.getElementById('habits-page-list');
+  if (pl) pl.innerHTML = HABITS.map((h,i) => `
+    <div class="habit-item" style="--hcolor:${h.color};animation-delay:${i*.06}s">
+      <div class="habit-info">
+        <div class="habit-dot" style="background:${h.color};color:${h.color}"></div>
+        <div>
+          <div class="habit-name">${h.name}</div>
+          <div class="habit-type-label" style="display:flex;gap:8px">
+            <span>${h.type}</span><span>·</span><span>daily</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="btn btn-secondary btn-sm">⏸ Pause</button>
+        <button class="btn-danger-sm">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderHeatmap() {
+  const g = document.getElementById('heatmap-grid');
+  if (!g) return;
+  const intensities = Array.from({length:84},(_,i)=>Math.random()<.3?0:Math.ceil(Math.random()*4));
+  g.innerHTML = intensities.map(v=>`<div class="hcell ${v?'i'+v:''}" title="${v} habits completed"></div>`).join('');
+}
+
+function renderDays() {
+  const g = document.getElementById('day-grid');
+  if (!g) return;
+  const days = [{d:'Mon',v:74},{d:'Tue',v:92,best:true},{d:'Wed',v:68},{d:'Thu',v:81},{d:'Fri',v:77},{d:'Sat',v:55},{d:'Sun',v:62}];
+  g.innerHTML = days.map(d=>`
+    <div class="day-card ${d.best?'best':''}">
+      <div class="day-name">${d.d}</div>
+      <div class="day-val">${d.v}%</div>
+      <div class="progress-bar" style="margin-top:5px"><div class="progress-fill" style="width:${d.v}%"></div></div>
+    </div>`).join('');
+}
+
+function renderNotifications() {
+  const l = document.getElementById('notifications-list');
+  if (!l) return;
+  const notifs = [
+    { title:'Streak Alert 🔥', msg:"You're on a 12-day streak! Don't break it today.", time:'2 min ago', unread:true },
+    { title:'Habit Reminder', msg:'Time for your Evening Journal. You have 2 hours left.', time:'1 hr ago', unread:true },
+    { title:'Weekly Summary', msg:'You completed 78% of your habits this week. Great job!', time:'Yesterday', unread:true },
+    { title:'Achievement Unlocked', msg:"You've earned the 'Early Bird' badge for 7 days of morning routines!", time:'2 days ago', unread:false },
+    { title:'Goal Reached', msg:'You completed your reading goal for the month!', time:'3 days ago', unread:false },
+  ];
+  l.innerHTML = notifs.map((n,i)=>`
+    <div class="notif-item ${n.unread?'unread':''}" style="animation-delay:${i*.05}s">
+      ${n.unread
+        ? `<div class="notif-dot"></div>`
+        : `<div style="width:8px;height:8px;border-radius:50%;background:var(--bg-hover);margin-top:5px;flex-shrink:0"></div>`}
+      <div style="flex:1">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-msg">${n.msg}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>
+      <button class="btn-danger-sm" style="align-self:center;line-height:1">×</button>
+    </div>`).join('');
+}
+
+function showTab(id) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const view = document.getElementById('view-'+id);
+  if (view) { view.classList.add('active'); view.style.animation='none'; requestAnimationFrame(()=>{view.style.animation=''}); }
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{ b.classList.toggle('active', ['dashboard','habits','analytics','notifications','auth'][i]===id); });
+  const header = document.getElementById('main-header');
+  if (header) header.style.display = id==='auth' ? 'none' : '';
+}
+
+function setActive(btn) {
+  document.querySelectorAll('#header-nav .nav-link').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+renderHabits();
+renderHeatmap();
+renderDays();
+renderNotifications();
+</script>
+</body>
+</html>

@@ -42,10 +42,12 @@ process.on('SIGTERM', () => {
 const startServer = async () => {
   try {
     await connectDB();
-    mq.connect().catch(err => console.warn('MQ connection deferred:', err.message));
 
-    // Set up message queue consumers (non-blocking)
-    setupConsumers().catch(err => console.warn('MQ consumer setup deferred:', err.message));
+    // Connect to message queue first
+    await mq.connect();
+
+    // Then set up consumers (only after MQ is connected)
+    await setupConsumers();
 
     server = app.listen(PORT, () => {
       console.log(`🚀 Analytics Service running on port ${PORT}`);

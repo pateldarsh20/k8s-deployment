@@ -35,38 +35,33 @@ const setupConsumers = async () => {
  */
 async function handleHabitLogged(message) {
   const { userId, habitId, date, completed } = message;
-  
+
   const recordDate = new Date(date);
   recordDate.setHours(0, 0, 0, 0);
 
-  // Find or create daily summary
-  let summary = await DailySummary.findOne({
-    userId,
-    date: recordDate
-  });
+  console.log(`  → Updating summary: userId=${userId}, date=${recordDate.toISOString()}, completed=${completed}`);
 
-  if (!summary) {
-    summary = await DailySummary.create({
-      userId,
-      date: recordDate,
-      habitsDue: 0,
-      habitsCompleted: 0,
-      completionRate: 0,
-      dayOfWeek: recordDate.getDay()
-    });
-  }
+  // Atomic upsert: find or create, then increment
+  const summary = await DailySummary.findOneAndUpdate(
+    { userId, date: recordDate },
+    {
+      $inc: {
+        habitsDue: 1,
+        habitsCompleted: completed ? 1 : 0
+      },
+      $setOnInsert: {
+        dayOfWeek: recordDate.getDay()
+      }
+    },
+    { upsert: true, new: true, runValidators: true }
+  );
 
-  // If this is a completion event, increment completed count
-  if (completed) {
-    summary.habitsCompleted += 1;
-  }
-
-  // Recalculate completion rate (in production, habits due would come from habit service)
+  // Recalculate completion rate
   if (summary.habitsDue > 0) {
     summary.completionRate = (summary.habitsCompleted / summary.habitsDue) * 100;
+    await summary.save();
+    console.log(`  ✓ Saved: due=${summary.habitsDue}, completed=${summary.habitsCompleted}, rate=${summary.completionRate.toFixed(1)}%`);
   }
-
-  await summary.save();
 }
 
 /**

@@ -57,7 +57,7 @@ const getCompletionRate = asyncHandler(async (req, res) => {
  */
 const getTrends = asyncHandler(async (req, res) => {
   const { days = 30, habitId } = req.query;
-  const userId = req.user.userId;
+  const userId = new mongoose.Types.ObjectId(req.user.userId);
 
   const startDate = new Date(Date.now() - parseInt(days) * 24 * 60 * 60 * 1000);
   startDate.setHours(0, 0, 0, 0);
@@ -146,7 +146,7 @@ const getHeatmap = asyncHandler(async (req, res) => {
  * Get best performing days of the week
  */
 const getBestDays = asyncHandler(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = new mongoose.Types.ObjectId(req.user.userId);
 
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 

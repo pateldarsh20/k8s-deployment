@@ -16,7 +16,10 @@
       "Bash(ss *)",
       "Bash(grep *)",
       "Bash(netstat *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(docker start *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)"
     ]
   },
   "$version": 3
