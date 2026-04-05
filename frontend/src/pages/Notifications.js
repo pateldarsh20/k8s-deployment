@@ -6,100 +6,93 @@ function Notifications() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadNotifications();
-  }, []);
+  useEffect(() => { loadNotifications(); }, []);
 
   const loadNotifications = async () => {
     try {
-      const response = await notificationsAPI.getAll({ limit: 50 });
-      setNotifications(response.data.data);
-      setUnreadCount(response.data.unreadCount);
+      const res = await notificationsAPI.getAll({ limit: 50 });
+      setNotifications(res.data.data);
+      setUnreadCount(res.data.unreadCount);
     } catch (err) {
-      console.error('Failed to load notifications:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   const markAsRead = async (id) => {
-    try {
-      await notificationsAPI.markAsRead(id);
-      loadNotifications();
-    } catch (err) {
-      console.error('Failed to mark as read:', err);
-    }
+    try { await notificationsAPI.markAsRead(id); loadNotifications(); } catch (err) { console.error(err); }
   };
 
   const markAllAsRead = async () => {
-    try {
-      await notificationsAPI.markAllAsRead();
-      loadNotifications();
-    } catch (err) {
-      console.error('Failed to mark all as read:', err);
-    }
+    try { await notificationsAPI.markAllAsRead(); loadNotifications(); } catch (err) { console.error(err); }
   };
 
   const deleteNotification = async (id) => {
-    try {
-      await notificationsAPI.delete(id);
-      loadNotifications();
-    } catch (err) {
-      console.error('Failed to delete notification:', err);
-    }
+    try { await notificationsAPI.delete(id); loadNotifications(); } catch (err) { console.error(err); }
   };
 
   if (loading) {
-    return <div className="loading"><div className="spinner"></div></div>;
+    return <div className="loading"><div className="spinner" /><span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Loading notifications...</span></div>;
   }
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <h2>
-          Notifications 
+      <div className="page-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <h2 className="page-title">Notifications</h2>
           {unreadCount > 0 && (
-            <span style={{ 
-              background: '#4CAF50', 
-              color: 'white', 
-              padding: '0.25rem 0.5rem', 
-              borderRadius: '12px', 
-              fontSize: '0.875rem',
-              marginLeft: '0.5rem'
-            }}>
-              {unreadCount}
+            <span className="badge badge-green" style={{ fontSize: '0.85rem', padding: '4px 12px' }}>
+              {unreadCount} new
             </span>
           )}
-        </h2>
+        </div>
         {unreadCount > 0 && (
           <button className="btn btn-secondary btn-sm" onClick={markAllAsRead}>
-            Mark all as read
+            Mark all read
           </button>
         )}
       </div>
 
       {notifications.length === 0 ? (
         <div className="card">
-          <p style={{ textAlign: 'center', color: '#757575' }}>No notifications</p>
+          <div className="empty-state">
+            <div className="empty-state-icon">🔔</div>
+            <div className="empty-state-title">All caught up!</div>
+            <p className="empty-state-text">No notifications right now. Keep up your great work.</p>
+          </div>
         </div>
       ) : (
         <div className="notification-list">
-          {notifications.map(notification => (
-            <div 
-              key={notification._id} 
-              className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
+          {notifications.map((n, i) => (
+            <div
+              key={n._id}
+              className={`notification-item ${!n.isRead ? 'unread' : ''}`}
+              style={{ animationDelay: `${i * 0.05}s` }}
+              onClick={() => !n.isRead && markAsRead(n._id)}
             >
-              <div className="notification-content" onClick={() => markAsRead(notification._id)}>
-                <div className="notification-title">{notification.title}</div>
-                <div className="notification-message">{notification.message}</div>
+              {!n.isRead && <div className="notification-dot" />}
+              {n.isRead && (
+                <div style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: 'var(--bg-hover)', marginTop: 6, flexShrink: 0
+                }} />
+              )}
+              <div className="notification-content">
+                <div className="notification-title">{n.title}</div>
+                <div className="notification-message">{n.message}</div>
                 <div className="notification-time">
-                  {new Date(notification.scheduledAt).toLocaleString()}
+                  {new Date(n.scheduledAt).toLocaleString('en-US', {
+                    month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                  })}
                 </div>
               </div>
-              <button 
+              <button
                 className="btn btn-danger btn-sm"
-                onClick={() => deleteNotification(notification._id)}
-                style={{ alignSelf: 'center' }}
+                onClick={(e) => { e.stopPropagation(); deleteNotification(n._id); }}
+                style={{ alignSelf: 'center', padding: '4px 10px', fontSize: '1rem', lineHeight: 1 }}
+                title="Delete"
               >
                 ×
               </button>

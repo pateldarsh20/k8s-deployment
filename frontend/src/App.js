@@ -9,67 +9,72 @@ import Analytics from './pages/Analytics';
 import Notifications from './pages/Notifications';
 import './App.css';
 
-// Protected Route Component
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return <div className="loading"><div className="spinner"></div></div>;
-  }
-
+  if (loading) return <div className="loading"><div className="spinner" /></div>;
   return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
-// Header Component
 function Header() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const pathname = location.pathname;
 
-  if (pathname === '/login' || pathname === '/signup') {
-    return null;
-  }
+  if (pathname === '/login' || pathname === '/signup') return null;
+
+  const initials = user?.name
+    ? user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    : '??';
+
+  const navLinks = [
+    { to: '/dashboard',     label: 'Dashboard' },
+    { to: '/habits',        label: 'Habits' },
+    { to: '/analytics',     label: 'Analytics' },
+    { to: '/notifications', label: 'Alerts' },
+  ];
 
   return (
     <header className="header">
       <div className="header-content">
-        <h1>🎯 Habit Tracker</h1>
+        <div className="header-logo">
+          <div className="logo-icon">🎯</div>
+          <h1>HabitFlow</h1>
+        </div>
+
         <nav>
-          <Link to="/dashboard" className={pathname === '/dashboard' ? 'active' : ''}>Dashboard</Link>
-          <Link to="/habits" className={pathname === '/habits' ? 'active' : ''}>Habits</Link>
-          <Link to="/analytics" className={pathname === '/analytics' ? 'active' : ''}>Analytics</Link>
-          <Link to="/notifications" className={pathname === '/notifications' ? 'active' : ''}>Notifications</Link>
-          <span style={{ color: 'rgba(255,255,255,0.7)' }}>Hi, {user?.name}</span>
-          <button className="btn-logout" onClick={logout}>Logout</button>
+          {navLinks.map(({ to, label }) => (
+            <Link key={to} to={to} className={pathname === to ? 'active' : ''}>
+              {label}
+            </Link>
+          ))}
         </nav>
+
+        <div className="header-right">
+          <div className="user-badge">
+            <div className="user-avatar">{initials}</div>
+            <span className="user-name">{user?.name?.split(' ')[0]}</span>
+          </div>
+          <button className="btn-logout" onClick={logout}>Sign out</button>
+        </div>
       </div>
     </header>
   );
 }
 
-// Main App Component
 function AppContent() {
   return (
     <>
       <Header />
       <div className="container">
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login"  element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={
-            <ProtectedRoute><Dashboard /></ProtectedRoute>
-          } />
-          <Route path="/habits" element={
-            <ProtectedRoute><Habits /></ProtectedRoute>
-          } />
-          <Route path="/analytics" element={
-            <ProtectedRoute><Analytics /></ProtectedRoute>
-          } />
-          <Route path="/notifications" element={
-            <ProtectedRoute><Notifications /></ProtectedRoute>
-          } />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="/dashboard"     element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/habits"        element={<ProtectedRoute><Habits /></ProtectedRoute>} />
+          <Route path="/analytics"     element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/"  element={<Navigate to="/dashboard" />} />
+          <Route path="*"  element={<Navigate to="/dashboard" />} />
         </Routes>
       </div>
     </>

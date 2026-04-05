@@ -8,14 +8,13 @@ function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [focusedField, setFocusedField] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     const result = await login(formData.email, formData.password);
-    
     setLoading(false);
     if (result.success) {
       navigate('/dashboard');
@@ -27,11 +26,14 @@ function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Welcome Back</h2>
-        <p>Sign in to track your habits</p>
-        
+        <div className="auth-logo">
+          <div className="auth-logo-icon">🎯</div>
+          <h2>Welcome back</h2>
+          <p>Sign in to continue your streak</p>
+        </div>
+
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className={`form-group ${focusedField === 'email' ? 'focused' : ''}`}>
             <label htmlFor="email">Email</label>
             <input
               type="email"
@@ -39,12 +41,15 @@ function Login() {
               className="form-control"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onFocus={() => setFocusedField('email')}
+              onBlur={() => setFocusedField(null)}
               required
               placeholder="you@example.com"
+              autoComplete="email"
             />
           </div>
-          
-          <div className="form-group">
+
+          <div className={`form-group ${focusedField === 'password' ? 'focused' : ''}`}>
             <label htmlFor="password">Password</label>
             <input
               type="password"
@@ -52,20 +57,33 @@ function Login() {
               className="form-control"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onFocus={() => setFocusedField('password')}
+              onBlur={() => setFocusedField(null)}
               required
               placeholder="••••••••"
+              autoComplete="current-password"
             />
           </div>
 
-          {error && <div className="alert alert-error">{error}</div>}
+          {error && (
+            <div className="alert alert-error">
+              <span>⚠</span> {error}
+            </div>
+          )}
 
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? (
+              <>
+                <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+                Signing in...
+              </>
+            ) : 'Sign In →'}
           </button>
         </form>
 
         <div className="auth-footer">
-          Don't have an account? <Link to="/signup">Sign up</Link>
+          Don't have an account?{' '}
+          <Link to="/signup">Create one free</Link>
         </div>
       </div>
     </div>

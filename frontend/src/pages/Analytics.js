@@ -7,9 +7,7 @@ function Analytics() {
   const [bestDays, setBestDays] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     try {
@@ -18,7 +16,6 @@ function Analytics() {
         analyticsAPI.getHeatmap({ months: 3 }),
         analyticsAPI.getBestDays()
       ]);
-
       setTrends(trendsRes.data.data);
       setHeatmap(heatmapRes.data.data);
       setBestDays(bestDaysRes.data.data);
@@ -30,43 +27,71 @@ function Analytics() {
   };
 
   if (loading) {
-    return <div className="loading"><div className="spinner"></div></div>;
+    return <div className="loading"><div className="spinner" /><span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Crunching numbers...</span></div>;
   }
+
+  const trendConfig = {
+    improving: { icon: '📈', label: 'Improving',   badge: 'badge-green',  desc: "You're on the right track! Keep it up." },
+    declining:  { icon: '📉', label: 'Declining',   badge: 'badge-red',    desc: "Let's get back on track together." },
+    stable:     { icon: '➡️', label: 'Stable',      badge: 'badge-amber',  desc: 'Consistency is key — push for growth.' },
+  };
+  const trend = trendConfig[trends?.trendDirection] || trendConfig.stable;
 
   return (
     <div>
-      <h2 style={{ marginBottom: '1.5rem' }}>Analytics</h2>
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">Analytics</h2>
+          <p className="page-subtitle">Last 30 days performance</p>
+        </div>
+      </div>
 
-      {/* Trend Direction */}
+      {/* Trend */}
       {trends && (
         <div className="card">
-          <h3 className="card-title">
-            Trend: {trends.trendDirection === 'improving' ? '📈 Improving' : 
-                   trends.trendDirection === 'declining' ? '📉 Declining' : '➡️ Stable'}
-          </h3>
+          <h3 className="card-title">Trend Overview</h3>
+          <div className="trend-indicator">
+            <div className={`trend-icon ${trends.trendDirection}`}>
+              {trend.icon}
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: '1.1rem' }}>
+                  {trend.label}
+                </span>
+                <span className={`badge ${trend.badge}`}>{trends.trendDirection}</span>
+              </div>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{trend.desc}</p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Heatmap */}
       {heatmap && (
         <div className="card">
-          <h3 className="card-title">Activity Heatmap (Last 3 Months)</h3>
-          <div className="heatmap">
-            {heatmap.entries.slice(-84).map((entry, index) => (
-              <div
-                key={index}
-                className={`heatmap-cell intensity-${entry.intensity}`}
-                title={`${entry.date}: ${entry.completed}/${entry.total}`}
-              ></div>
-            ))}
+          <h3 className="card-title">Activity Heatmap</h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+            Last 3 months · Hover cells for details
+          </p>
+          <div className="heatmap-wrapper">
+            <div className="heatmap">
+              {heatmap.entries.slice(-84).map((entry, i) => (
+                <div
+                  key={i}
+                  className={`heatmap-cell${entry.intensity ? ` intensity-${entry.intensity}` : ''}`}
+                  title={`${entry.date}: ${entry.completed}/${entry.total} habits`}
+                />
+              ))}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', fontSize: '0.75rem', color: '#757575' }}>
+          <div className="heatmap-legend">
             <span>Less</span>
-            <div className="heatmap-cell intensity-0" style={{ width: '12px', height: '12px' }}></div>
-            <div className="heatmap-cell intensity-1" style={{ width: '12px', height: '12px' }}></div>
-            <div className="heatmap-cell intensity-2" style={{ width: '12px', height: '12px' }}></div>
-            <div className="heatmap-cell intensity-3" style={{ width: '12px', height: '12px' }}></div>
-            <div className="heatmap-cell intensity-4" style={{ width: '12px', height: '12px' }}></div>
+            <div className="heatmap-legend-cells">
+              {[0,1,2,3,4].map(i => (
+                <div key={i} className={`heatmap-legend-cell heatmap-cell${i ? ` intensity-${i}` : ''}`} />
+              ))}
+            </div>
             <span>More</span>
           </div>
         </div>
@@ -77,21 +102,35 @@ function Analytics() {
         <div className="card">
           <h3 className="card-title">Best Performing Days</h3>
           {bestDays.bestDay && (
-            <p style={{ marginBottom: '1rem' }}>
-              🏆 Your best day is <strong>{bestDays.bestDay.day}</strong> with 
-              {bestDays.bestDay.avgCompletionRate}% average completion rate
-            </p>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '12px',
+              padding: '0.85rem 1rem',
+              background: 'rgba(0,200,150,0.06)',
+              border: '1px solid rgba(0,200,150,0.2)',
+              borderRadius: 'var(--radius-md)',
+              marginBottom: '1.25rem',
+            }}>
+              <span style={{ fontSize: '1.5rem' }}>🏆</span>
+              <div>
+                <span style={{ fontWeight: 600 }}>{bestDays.bestDay.day}</span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                  {' '}is your best day with{' '}
+                </span>
+                <span style={{ color: 'var(--primary)', fontWeight: 700 }}>
+                  {bestDays.bestDay.avgCompletionRate}%
+                </span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}> avg completion</span>
+              </div>
+            </div>
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.5rem' }}>
+          <div className="day-grid">
             {bestDays.allDays.map(day => (
-              <div key={day.day} style={{ 
-                padding: '0.75rem', 
-                background: day.day === bestDays.bestDay?.day ? '#e8f5e9' : '#f5f5f5',
-                borderRadius: '4px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontWeight: 600 }}>{day.day}</div>
-                <div style={{ fontSize: '1.25rem', color: '#4CAF50' }}>{day.avgCompletionRate}%</div>
+              <div key={day.day} className={`day-card ${day.day === bestDays.bestDay?.day ? 'best' : ''}`}>
+                <div className="day-card-name">{day.day.slice(0, 3)}</div>
+                <div className="day-card-value">{day.avgCompletionRate}%</div>
+                <div className="progress-bar" style={{ marginTop: '6px' }}>
+                  <div className="progress-fill" style={{ width: `${day.avgCompletionRate}%` }} />
+                </div>
               </div>
             ))}
           </div>

@@ -1,6 +1,6 @@
-# Habit Tracker - Microservices Architecture
+# HabitFlow — Habit Tracker
 
-A production-ready Habit Tracker application built with a microservices architecture.
+A production-ready habit tracker built with a microservices architecture, featuring a dark-themed React frontend, real-time analytics, and event-driven data processing.
 
 ## Architecture Diagram
 
@@ -44,43 +44,158 @@ A production-ready Habit Tracker application built with a microservices architec
 
 ## Habit Types
 
-- **binary**: Yes/No completion (e.g., "Did you meditate?")
-- **count**: Numeric count (e.g., "Drank 8 glasses of water")
-- **time**: Time-based (e.g., "Ran for 30 minutes")
-- **negative**: Avoiding behavior (e.g., "No social media")
+| Type | Description | Example |
+|------|-------------|---------|
+| **binary** | Yes/No completion | "Did you meditate?" |
+| **count** | Numeric count | "Drank 8 glasses of water" |
+| **time** | Time-based | "Ran for 30 minutes" |
+| **negative** | Avoiding behavior | "No social media today" |
 
 ## Schedule Types
 
-- **daily**: Every day
-- **weekly**: Specific days of the week
-- **custom**: Custom recurrence pattern
+- **daily** — Every day
+- **weekly** — Specific days of the week (e.g., Mon–Fri)
+- **custom** — Custom recurrence pattern
 
 ## Tech Stack
 
 - **Backend**: Node.js + Express
-- **Database**: MongoDB (per service)
+- **Database**: MongoDB (one per service)
 - **Message Queue**: RabbitMQ
 - **Authentication**: JWT
 - **Containerization**: Docker + Docker Compose
-- **Frontend**: React
+- **Frontend**: React (dark theme, Syne + DM Sans fonts)
 
 ## Quick Start
 
 ```bash
 # Build and start all services
-docker-compose up --build
+docker-compose up -d --build
 
-# Or run individual services
-cd services/user-service && npm install && npm run dev
+# Check service health
+curl http://localhost:3000/health
+
+# Frontend is available at
+# http://localhost:80
 ```
+
+## Demo Account
+
+A pre-seeded demo account is available with **20 days of tracking data** across 5 habits:
+
+| Field | Value |
+|-------|-------|
+| **URL** | `http://localhost:80` |
+| **Email** | `demo@habittracker.com` |
+| **Password** | `demo123456` |
+
+### Pre-loaded Habits
+
+| Habit | Type | Schedule |
+|-------|------|----------|
+| Morning Meditation | time (10 min) | Daily |
+| Read 30 Pages | count (30 pages) | Daily |
+| Exercise | time (30 min) | Weekdays only |
+| Drink 8 Glasses of Water | count (8 glasses) | Daily |
+| Journal Writing | binary | Daily |
+
+## Features
+
+### Dashboard
+- Today's habit checklist with one-click toggle
+- Completion rate %, day streak, weekly stats
+- Personalized insights ("Sunday is your most productive day")
+
+### Habits
+- Create habits with type selector (Yes/No, Count, Duration, Avoid)
+- Color picker with presets + custom color
+- Pause/resume and delete habits
+- Schedule habits for specific days
+
+### Analytics
+- **Trend Overview** — Improving / Declining / Stable badge
+- **Activity Heatmap** — GitHub-style calendar (last 3 months, 5 intensity levels)
+- **Best Days** — Ranked days of the week with completion percentages
+- **Weekly Report** — Week-over-week comparison
+
+### Notifications
+- Unread badge with pulsing dot
+- Mark individual or all as read
+- Delete notifications
 
 ## API Endpoints
 
-See individual service documentation for detailed API specs.
+### Auth (no token required)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/signup` | Create account |
+| POST | `/api/auth/login` | Authenticate |
+
+### Habits (JWT required)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/habits` | Create habit |
+| GET | `/api/habits` | List all habits |
+| GET | `/api/habits/today` | Today's habits |
+| GET | `/api/habits/:id` | Get habit by ID |
+| PUT | `/api/habits/:id` | Update habit |
+| DELETE | `/api/habits/:id` | Delete habit |
+| POST | `/api/habits/:id/pause` | Pause habit |
+| POST | `/api/habits/:id/resume` | Resume habit |
+
+### Tracking (JWT required)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/tracking/log` | Log habit completion |
+| GET | `/api/tracking/today` | Today's records |
+| GET | `/api/tracking/stats` | Tracking statistics |
+| GET | `/api/tracking/:habitId` | Habit records |
+| GET | `/api/tracking/:habitId/streak` | Habit streak |
+
+### Analytics (JWT required)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/analytics/insights` | Comprehensive insights |
+| GET | `/api/analytics/trends` | Trend direction + data points |
+| GET | `/api/analytics/heatmap` | Calendar heatmap |
+| GET | `/api/analytics/best-days` | Best/worst days of week |
+| GET | `/api/analytics/weekly-report` | Weekly summary |
+
+### Notifications (JWT required)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/notifications` | List notifications |
+| GET | `/api/notifications/stats` | Notification stats |
+| PUT | `/api/notifications/:id/read` | Mark as read |
+| PUT | `/api/notifications/read-all` | Mark all as read |
+| DELETE | `/api/notifications/:id` | Delete notification |
+
+## Project Structure
+
+```
+habit-tracker/
+├── frontend/src/
+│   ├── App.js                  # Router, header, layout
+│   ├── App.css                 # All styles (dark theme)
+│   ├── context/AuthContext.js  # Auth state & logic
+│   ├── services/api.js         # API client
+│   └── pages/                  # Page components
+├── services/
+│   ├── api-gateway/            # Gateway (routing, auth, rate limit)
+│   ├── user-service/           # Auth & profiles
+│   ├── habit-service/          # Habit CRUD
+│   ├── tracking-service/       # Completions & streaks
+│   ├── analytics-service/      # Insights & trends
+│   └── notification-service/   # Reminders
+├── shared/                     # Shared middleware & utils
+├── docker-compose.yml          # Full stack orchestration
+└── seed_data.py                # Demo data generator
+```
 
 ## Design Principles
 
-- **Loose Coupling**: Services communicate via REST APIs and message queues
-- **High Cohesion**: Each service owns its data and logic
-- **Independent Deployability**: Each service can be deployed separately
-- **Scalability**: Services can be scaled independently based on load
+- **Loose Coupling** — Services communicate via REST APIs and message queues
+- **High Cohesion** — Each service owns its data and logic
+- **Independent Deployability** — Each service can be deployed separately
+- **Scalability** — Services scale independently based on load
+- **Event-Driven Analytics** — Tracking service publishes events; analytics service consumes asynchronously
