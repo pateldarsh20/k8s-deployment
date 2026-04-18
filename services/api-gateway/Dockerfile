@@ -2,6 +2,10 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Copy shared utilities
+COPY shared/ ./shared/
+
+# Copy service files
 COPY services/api-gateway/package*.json ./
 RUN npm install
 COPY services/api-gateway/ ./

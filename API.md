@@ -222,7 +222,7 @@ Get habit statistics.
   "data": {
     "totalHabits": 10,
     "activeHabits": 7,
-    "pausedHabits": 2,
+    "pausedHabits":  2,
     "archivedHabits": 1,
     "totalCompletions": 250,
     "longestStreak": 45,

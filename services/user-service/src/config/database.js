@@ -5,6 +5,25 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/habit-
 
 let isConnected = false;
 
+const getMongoOptions = () => {
+  const options = {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  };
+
+  const uri = MONGODB_URI;
+  const match = uri.match(/mongodb:\/\/([^:]+):([^@]+)@/);
+
+  if (match) {
+    options.user = match[1];
+    options.pass = match[2];
+    options.authSource = 'admin';
+  }
+
+  return options;
+};
+
 /**
  * Connect to MongoDB database
  */
@@ -15,11 +34,7 @@ const connectDB = async () => {
   }
 
   try {
-    const conn = await mongoose.connect(MONGODB_URI, {
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    });
+    const conn = await mongoose.connect(MONGODB_URI, getMongoOptions());
 
     isConnected = true;
     console.log(`✅ MongoDB Connected: ${conn.connection.host}:${conn.connection.port}/${conn.connection.name}`);
