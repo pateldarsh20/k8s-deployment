@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose *)",
+      "Bash(docker ps *)",
+      "Bash(docker inspect *)",
+      "Bash(docker logs *)",
+      "Bash(curl *)",
+      "Bash(docker exec *)",
+      "Bash(sleep *)",
+      "Bash(docker stop *)",
+      "Bash(docker rm *)",
+      "Bash(docker build *)",
+      "Bash(docker run *)",
+      "Bash(lsof *)",
+      "Bash(ss *)",
+      "Bash(grep *)",
+      "Bash(netstat *)",
+      "Bash(python3 *)",
+      "Bash(docker start *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)"
+    ]
+  },
+  "$version": 3
+}
