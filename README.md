@@ -4,30 +4,25 @@ A production-ready habit tracker built with a microservices architecture, featur
 
 ## Architecture Diagram
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          API Gateway (:3000)                         │
-│                  Single Entry Point + Auth + Rate Limit                  │
-└────┬──────────┬──────────────┬──────────────┬───────────────┬───────────┘
-     │          │              │              │               │
-     ▼          ▼              ▼              ▼               ▼
-┌─────────┐┌──────────┐┌───────────┐┌────────────┐┌──────────────┐
-│  User   ││  Habit   ││ Tracking  ││ Analytics  ││ Notification │
-│ Service ││ Service  ││  Service  ││  Service   ││   Service    │
-│  :3001  ││  :3002   ││  :3003    ││  :3004     ││   :3005      │
-└────┬────┘└────┬─────┘└─────┬─────┘└─────┬──────┘└──────┬───────┘
-     │          │             │             │              │
-     ▼          ▼             ▼             ▼              ▼
-┌─────────┐┌──────────┐┌───────────┐┌────────────┐┌──────────────┐
-│ MongoDB ││ MongoDB  ││  MongoDB  ││  MongoDB   ││   MongoDB    │
-│  :27017 ││  :27018  ││  :27019   ││  :27020    ││   :27021     │
-└─────────┘└──────────┘└───────────┘└────────────┘└──────────────┘
-                              │
-                    ┌─────────▼─────────┐
-                    │   Message Queue    │
-                    │  (RabbitMQ:5672)   │
-                    │  Async Events     │
-                    └───────────────────┘
+```mermaid
+graph TD
+    Client[React Frontend] -->|HTTP / API Calls| Gateway[API Gateway :3000]
+    
+    Gateway -->|REST API| User[User Service :3001]
+    Gateway -->|REST API| Habit[Habit Service :3002]
+    Gateway -->|REST API| Tracking[Tracking Service :3003]
+    Gateway -->|REST API| Analytics[Analytics Service :3004]
+    Gateway -->|REST API| Notification[Notification Service :3005]
+    
+    User --> DB1[(MongoDB Users :27017)]
+    Habit --> DB2[(MongoDB Habits :27018)]
+    Tracking --> DB3[(MongoDB Tracking :27019)]
+    Analytics --> DB4[(MongoDB Analytics :27020)]
+    Notification --> DB5[(MongoDB Notifications :27021)]
+    
+    Tracking -->|Publish Event| MQ{RabbitMQ :5672}
+    MQ -->|Consume Event| Analytics
+    MQ -->|Consume Event| Notification
 ```
 
 ## Services & Responsibilities
@@ -43,16 +38,31 @@ A production-ready habit tracker built with a microservices architecture, featur
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Runtime** | Node.js 18+ |
-| **Framework** | Express.js |
-| **Database** | MongoDB (one per service) |
-| **Message Queue** | RabbitMQ |
-| **Authentication** | JWT |
-| **Frontend** | React (dark theme) |
-| **Container** | Docker, Docker Compose |
-| **Orchestration** | Kubernetes (Kind) |
+| Layer | Technology | Description |
+|-------|-----------|-------------|
+| **Frontend** | React | Dark-themed responsive user interface |
+| **API Gateway** | Express.js | Request routing, rate limiting, and JWT authentication |
+| **Microservices**| Node.js 18+, Express.js | 5 independent backend services |
+| **Databases** | MongoDB | Database-per-service pattern (5 separate instances) |
+| **Message Queue**| RabbitMQ | Asynchronous event-driven communication |
+| **Containerization**| Docker, Docker Compose | Local development and building container images |
+| **Orchestration**| Kubernetes (EKS/Kind) | Container deployment, scaling, and management |
+
+## Kubernetes Features Checklist
+
+This project leverages various Kubernetes features to ensure a robust, scalable, and manageable deployment:
+
+- [x] **Deployments**: Manages stateless applications (Frontend, API Gateway, Microservices).
+- [x] **StatefulSets**: Used for stateful applications like MongoDB and RabbitMQ to maintain stable network IDs and persistent storage.
+- [x] **Services (ClusterIP & NodePort/LoadBalancer)**: Internal communication between microservices and external access to the frontend/API.
+- [x] **ConfigMaps**: Externalized configuration (e.g., `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX_REQUESTS`).
+- [x] **Secrets**: Secure management of sensitive credentials like `JWT_SECRET`.
+- [x] **Resource Requests & Limits**: Defined for all containers to ensure fair resource scheduling and prevent CPU/Memory starvation.
+  - *CPU Requests*: `100m` to `200m`
+  - *CPU Limits*: `500m` to `1000m`
+  - *Memory Requests*: `128Mi` to `256Mi`
+  - *Memory Limits*: `256Mi` to `512Mi`
+- [x] **Namespaces**: Logical isolation of project resources (`habit-tracker` namespace).
 
 ## Habit Types
 
@@ -188,33 +198,8 @@ kubectl port-forward -n habit-tracker svc/frontend 8080:3000 &
 | GET | `/api/analytics/heatmap` | Heatmap |
 | GET | `/api/analytics/best-days` | Best days |
 
----
 
-## Project Structure
 
-```
-habit-tracker/
-├── kind-deploy.yaml          # Kubernetes deployment
-├── docker-compose.yml       # Docker Compose
-├── build_and_push.py      # Build script
-├── frontend/               # React frontend
-│   ├── src/
-│   │   ├── App.js
-│   │   ├── App.css
-│   │   ├── context/
-│   │   ├── services/
-│   │   └── pages/
-├── services/
-│   ├── api-gateway/     # :3000
-│   ├── user-service/    # :3001
-│   ├── habit-service/   # :3002
-│   ├── tracking-service/ # :3003
-│   ├���─ analytics-service/ # :3004
-│   └── notification-service/ # :3005
-└── shared/              # Shared utilities
-```
-
----
 
 ## Design Principles
 
