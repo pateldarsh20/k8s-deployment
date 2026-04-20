@@ -237,7 +237,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: pateldarsh21/habit-tracker:api-gateway-v3
+          image: pateldarsh21/habit-tracker:api-gateway-v4
           ports:
             - containerPort: 3000
           resources:
@@ -296,7 +296,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: pateldarsh21/habit-tracker:frontend-v1
+          image: pateldarsh21/habit-tracker:frontend-v2
           ports:
             - containerPort: 3000
           resources:
