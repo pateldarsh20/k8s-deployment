@@ -42,6 +42,17 @@ app.use(morgan('combined'));
 // Health check (no auth required)
 app.use('/health', healthRoutes);
 
+// Welcome route (no auth required)
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Welcome to Habit Tracker API Gateway',
+    version: '1.0.0',
+    docs: '/api/docs',
+    health: '/health'
+  });
+});
+
 // Authentication middleware (applied before proxy)
 app.use(authenticateToken);
 

@@ -17,6 +17,9 @@ const PUBLIC_PATHS = [
  * Check if path is public
  */
 const isPublicPath = (path) => {
+  // Exactly the root path is public
+  if (path === '/') return true;
+  
   return PUBLIC_PATHS.some(publicPath => path.startsWith(publicPath));
 };
 

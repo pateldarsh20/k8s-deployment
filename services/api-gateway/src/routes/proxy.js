@@ -72,7 +72,6 @@ serviceProxies.forEach(({ path, target, name, pathRewrite }) => {
           proxyReq.setHeader('Content-Type', 'application/json');
           proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
           proxyReq.write(bodyData);
-          proxyReq.end();
         }
       },
       onError: (err, req, res) => {

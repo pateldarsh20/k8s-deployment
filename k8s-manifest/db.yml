@@ -1,3 +1,4 @@
+---
 # ==================== RABBITMQ ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -22,6 +23,13 @@ spec:
               name: amqp
             - containerPort: 15672
               name: mgmt
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           env:
             - name: RABBITMQ_DEFAULT_USER
               value: "guest"
@@ -45,8 +53,8 @@ spec:
     - name: mgmt
       port: 15672
       targetPort: 15672
-      nodePort: 15672
-
+      nodePort: 31672
+---
 # ==================== MONGODB USERS ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -68,6 +76,13 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
@@ -87,7 +102,7 @@ spec:
   ports:
     - port: 27017
       targetPort: 27017
-
+---
 # ==================== MONGODB HABITS ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -109,6 +124,13 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
@@ -128,7 +150,7 @@ spec:
   ports:
     - port: 27017
       targetPort: 27017
-
+---
 # ==================== MONGODB TRACKING ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -150,6 +172,13 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
@@ -169,7 +198,7 @@ spec:
   ports:
     - port: 27017
       targetPort: 27017
-
+---
 # ==================== MONGODB ANALYTICS ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -191,6 +220,13 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
@@ -210,7 +246,7 @@ spec:
   ports:
     - port: 27017
       targetPort: 27017
-
+---
 # ==================== MONGODB NOTIFICATIONS ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -232,6 +268,13 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db

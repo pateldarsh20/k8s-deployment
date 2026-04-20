@@ -1,3 +1,4 @@
+---
 # ==================== USER SERVICE ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -19,6 +20,13 @@ spec:
           image: pateldarsh21/habit-tracker:user-service-v1
           ports:
             - containerPort: 3001
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           env:
             - name: NODE_ENV
               value: "production"
@@ -34,6 +42,7 @@ spec:
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
 
+---
 # ==================== HABIT SERVICE ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -55,6 +64,13 @@ spec:
           image: pateldarsh21/habit-tracker:habit-service-v1
           ports:
             - containerPort: 3002
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           env:
             - name: NODE_ENV
               value: "production"
@@ -70,6 +86,7 @@ spec:
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
 
+---
 # ==================== TRACKING SERVICE ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -91,6 +108,13 @@ spec:
           image: pateldarsh21/habit-tracker:tracking-service-v1
           ports:
             - containerPort: 3003
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           env:
             - name: NODE_ENV
               value: "production"
@@ -106,6 +130,7 @@ spec:
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
 
+---
 # ==================== ANALYTICS SERVICE ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -127,6 +152,13 @@ spec:
           image: pateldarsh21/habit-tracker:analytics-service-v1
           ports:
             - containerPort: 3004
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
           env:
             - name: NODE_ENV
               value: "production"
@@ -142,6 +174,7 @@ spec:
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
 
+---
 # ==================== NOTIFICATION SERVICE ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -163,6 +196,13 @@ spec:
           image: pateldarsh21/habit-tracker:notification-service-v1
           ports:
             - containerPort: 3005
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           env:
             - name: NODE_ENV
               value: "production"
@@ -178,6 +218,7 @@ spec:
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
 
+---
 # ==================== API GATEWAY ====================
 apiVersion: apps/v1
 kind: Deployment
@@ -196,9 +237,16 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: pateldarsh21/habit-tracker:api-gateway-v1
+          image: pateldarsh21/habit-tracker:api-gateway-v3
           ports:
             - containerPort: 3000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           env:
             - name: NODE_ENV
               value: "production"
@@ -229,28 +277,33 @@ spec:
                 configMapKeyRef:
                   name: habit-tracker-config
                   key: RATE_LIMIT_MAX_REQUESTS
-
-# ==================== FRONTEND (Commented) ====================
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: frontend
-#   namespace: habit-tracker
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app: frontend
-#   template:
-#     metadata:
-#       labels:
-#         app: frontend
-#     spec:
-#       containers:
-#         - name: frontend
-#           image: pateldarsh21/habit-tracker:frontend-v1
-#           ports:
-#             - containerPort: 3000
-#           env:
-#             - name: REACT_APP_API_URL
-#               value: "http://localhost:30080"
+---
+# ==================== FRONTEND ====================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: habit-tracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: pateldarsh21/habit-tracker:frontend-v1
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+---
