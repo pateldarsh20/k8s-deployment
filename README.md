@@ -52,17 +52,7 @@ graph TD
 
 This project leverages various Kubernetes features to ensure a robust, scalable, and manageable deployment:
 
-- [x] **Deployments**: Manages stateless applications (Frontend, API Gateway, Microservices).
-- [x] **StatefulSets**: Used for stateful applications like MongoDB and RabbitMQ to maintain stable network IDs and persistent storage.
-- [x] **Services (ClusterIP & NodePort/LoadBalancer)**: Internal communication between microservices and external access to the frontend/API.
-- [x] **ConfigMaps**: Externalized configuration (e.g., `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX_REQUESTS`).
-- [x] **Secrets**: Secure management of sensitive credentials like `JWT_SECRET`.
-- [x] **Resource Requests & Limits**: Defined for all containers to ensure fair resource scheduling and prevent CPU/Memory starvation.
-  - *CPU Requests*: `100m` to `200m`
-  - *CPU Limits*: `500m` to `1000m`
-  - *Memory Requests*: `128Mi` to `256Mi`
-  - *Memory Limits*: `256Mi` to `512Mi`
-- [x] **Namespaces**: Logical isolation of project resources (`habit-tracker` namespace).
+- [x] F1 (listing soon)
 
 ## Habit Types
 
@@ -109,7 +99,6 @@ kubectl port-forward -n habit-tracker svc/api-gateway 3000:3000 &
 kubectl port-forward -n habit-tracker svc/frontend 8080:3000 &
 
 # Access:
-# API: http://localhost:3000
 # Frontend: http://localhost:8080
 ```
 
