@@ -6,7 +6,7 @@ metadata:
   name: user-service
   namespace: habit-tracker
 spec:
-  replicas: 1
+  # NO replicas field - HPA controls this
   selector:
     matchLabels:
       app: user-service
@@ -41,6 +41,16 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
+          # ========== PRE-STOP HOOK ==========
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 10"
+      # ========== TERMINATION GRACE PERIOD ==========
+      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== HABIT SERVICE ====================
@@ -50,7 +60,6 @@ metadata:
   name: habit-service
   namespace: habit-tracker
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: habit-service
@@ -85,6 +94,14 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 10"
+      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== TRACKING SERVICE ====================
@@ -94,7 +111,6 @@ metadata:
   name: tracking-service
   namespace: habit-tracker
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: tracking-service
@@ -129,16 +145,24 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 10"
+      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== ANALYTICS SERVICE ====================
+# Heavy service - needs more time
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: analytics-service
   namespace: habit-tracker
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: analytics-service
@@ -173,6 +197,14 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 30"  # Longer sleep for analytics
+      terminationGracePeriodSeconds: 90  # More time for heavy service
 
 ---
 # ==================== NOTIFICATION SERVICE ====================
@@ -182,7 +214,6 @@ metadata:
   name: notification-service
   namespace: habit-tracker
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: notification-service
@@ -217,16 +248,24 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 10"
+      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== API GATEWAY ====================
+# Critical service - needs careful draining
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-gateway
   namespace: habit-tracker
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: api-gateway
@@ -277,15 +316,24 @@ spec:
                 configMapKeyRef:
                   name: habit-tracker-config
                   key: RATE_LIMIT_MAX_REQUESTS
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 15"  # Drain active connections
+      terminationGracePeriodSeconds: 60  # Give time to finish requests
+
 ---
 # ==================== FRONTEND ====================
+# Static files - fast shutdown
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
   namespace: habit-tracker
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -306,4 +354,11 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
----
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 5"  # Short sleep for static files
+      terminationGracePeriodSeconds: 30
