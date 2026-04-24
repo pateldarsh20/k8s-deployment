@@ -5,7 +5,7 @@ WORKDIR /app
 COPY shared/ ./shared/
 
 COPY services/analytics-service/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY services/analytics-service/ ./
 
 EXPOSE 3004

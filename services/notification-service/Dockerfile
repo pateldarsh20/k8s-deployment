@@ -5,7 +5,7 @@ WORKDIR /app
 COPY shared/ ./shared/
 
 COPY services/notification-service/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY services/notification-service/ ./
 
 EXPOSE 3005

@@ -7,7 +7,7 @@ COPY shared/ ./shared/
 
 # Copy service files
 COPY services/api-gateway/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY services/api-gateway/ ./
 
 EXPOSE 3000

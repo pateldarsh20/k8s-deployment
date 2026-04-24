@@ -7,7 +7,7 @@ COPY shared/ ./shared/
 
 # Copy service files
 COPY services/user-service/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY services/user-service/ ./
 
 # Expose port

@@ -7,7 +7,7 @@ COPY shared/ ./shared/
 
 # Copy service files
 COPY services/habit-service/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY services/habit-service/ ./
 
 EXPOSE 3002

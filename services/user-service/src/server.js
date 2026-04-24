@@ -7,7 +7,14 @@ const healthRoutes = require('./routes/healthRoutes');
 const { errorHandler, AppError } = require('../shared/utils/errorHandler');
 const mq = require('../shared/utils/messageQueue');
 
+const promMid = require('express-prometheus-middleware');
 const app = express();
+
+app.use(promMid({
+  metricsPath: '/metrics',
+  collectDefaultMetrics: true,
+  requestDurationBuckets: [0.1, 0.5, 1, 1.5, 2, 3, 5]
+}));
 const PORT = process.env.PORT || 3001;
 
 // Middleware

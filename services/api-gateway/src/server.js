@@ -8,7 +8,14 @@ const { authenticateToken } = require('./middleware/auth');
 const proxyRoutes = require('./routes/proxy');
 const healthRoutes = require('./routes/health');
 
+const promMid = require('express-prometheus-middleware');
 const app = express();
+
+app.use(promMid({
+  metricsPath: '/metrics',
+  collectDefaultMetrics: true,
+  requestDurationBuckets: [0.1, 0.5, 1, 1.5, 2, 3, 5]
+}));
 const PORT = process.env.PORT || 3000;
 
 // Security middleware

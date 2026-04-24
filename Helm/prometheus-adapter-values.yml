@@ -1,0 +1,25 @@
+rules:
+  custom:
+    # 1. Map http_requests_total to http_requests_per_second
+    - seriesQuery: '{__name__=~"^http_requests_total$"}'
+      resources:
+        overrides:
+          kubernetes_namespace: {resource: "namespace"}
+          kubernetes_pod_name: {resource: "pod"}
+      name:
+        matches: "^http_requests_total$"
+        as: "http_requests_per_second"
+      # Calculates requests per second over a 2 minute window
+      metricsQuery: 'sum(rate(<<.Series>>{<<.LabelMatchers>>}[2m])) by (<<.GroupBy>>)'
+
+    # 2. Map http_request_duration_seconds_bucket to http_request_duration_p95_ms
+    - seriesQuery: '{__name__=~"^http_request_duration_seconds_bucket$"}'
+      resources:
+        overrides:
+          kubernetes_namespace: {resource: "namespace"}
+          kubernetes_pod_name: {resource: "pod"}
+      name:
+        matches: "^http_request_duration_seconds_bucket$"
+        as: "http_request_duration_p95_ms"
+      # Calculates the P95 latency in milliseconds over a 2 minute window
+      metricsQuery: 'histogram_quantile(0.95, sum(rate(<<.Series>>{<<.LabelMatchers>>}[2m])) by (le, <<.GroupBy>>)) * 1000'

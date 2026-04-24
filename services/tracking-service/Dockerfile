@@ -5,7 +5,7 @@ WORKDIR /app
 COPY shared/ ./shared/
 
 COPY services/tracking-service/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY services/tracking-service/ ./
 
 EXPOSE 3003
