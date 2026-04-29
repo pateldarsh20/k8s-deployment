@@ -264,7 +264,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: analytics-service
-  minReplicas: 1                    
+  minReplicas: 2                    
   maxReplicas: 9                    
   metrics:
   - type: Resource
