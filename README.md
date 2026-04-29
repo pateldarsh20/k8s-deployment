@@ -95,8 +95,8 @@ kind load docker-image pateldarsh21/habit-tracker:user-service-v1
 kubectl apply -f kind-deploy.yaml
 
 # 4. Access via port-forward
-kubectl port-forward -n habit-tracker svc/api-gateway 3000:3000 &
-kubectl port-forward -n habit-tracker svc/frontend 8080:3000 &
+
+kubectl port-forward -n habit-tracker svc/frontend 3000:3000 &
 
 # Access:
 # Frontend: http://localhost:8080
