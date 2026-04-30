@@ -6,7 +6,6 @@ metadata:
   name: user-service
   namespace: habit-tracker
 spec:
-  # NO replicas field - HPA controls this
   selector:
     matchLabels:
       app: user-service
@@ -50,7 +49,6 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
-          # ========== PRE-STOP HOOK ==========
           lifecycle:
             preStop:
               exec:
@@ -58,7 +56,6 @@ spec:
                 - sh
                 - -c
                 - "sleep 10"
-      # ========== TERMINATION GRACE PERIOD ==========
       terminationGracePeriodSeconds: 45
 
 ---
@@ -89,6 +86,17 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          # ========== READINESS PROBE ADDED ==========
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1
+          # ===========================================
           env:
             - name: NODE_ENV
               value: "production"
@@ -140,6 +148,17 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          # ========== READINESS PROBE ADDED ==========
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1
+          # ===========================================
           env:
             - name: NODE_ENV
               value: "production"
@@ -165,7 +184,6 @@ spec:
 
 ---
 # ==================== ANALYTICS SERVICE ====================
-# Heavy service - needs more time
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -192,6 +210,17 @@ spec:
             limits:
               cpu: "1000m"
               memory: "512Mi"
+          # ========== READINESS PROBE ADDED ==========
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+            successThreshold: 1
+          # ===========================================
           env:
             - name: NODE_ENV
               value: "production"
@@ -212,8 +241,8 @@ spec:
                 command:
                 - sh
                 - -c
-                - "sleep 30"  # Longer sleep for analytics
-      terminationGracePeriodSeconds: 90  # More time for heavy service
+                - "sleep 30"
+      terminationGracePeriodSeconds: 90
 
 ---
 # ==================== NOTIFICATION SERVICE ====================
@@ -243,6 +272,17 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          # ========== READINESS PROBE ADDED ==========
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3005
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1
+          # ===========================================
           env:
             - name: NODE_ENV
               value: "production"
@@ -268,7 +308,6 @@ spec:
 
 ---
 # ==================== API GATEWAY ====================
-# Critical service - needs careful draining
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -295,6 +334,17 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          # ========== READINESS PROBE ADDED ==========
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1
+          # ===========================================
           env:
             - name: NODE_ENV
               value: "production"
@@ -331,12 +381,11 @@ spec:
                 command:
                 - sh
                 - -c
-                - "sleep 15"  # Drain active connections
-      terminationGracePeriodSeconds: 60  # Give time to finish requests
+                - "sleep 15"
+      terminationGracePeriodSeconds: 60
 
 ---
 # ==================== FRONTEND ====================
-# Static files - fast shutdown
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -363,11 +412,22 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          # ========== READINESS PROBE ADDED ==========
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+            successThreshold: 1
+          # ===========================================
           lifecycle:
             preStop:
               exec:
                 command:
                 - sh
                 - -c
-                - "sleep 5"  # Short sleep for static files
+                - "sleep 5"
       terminationGracePeriodSeconds: 30
