@@ -3,12 +3,16 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
 const trackingRoutes = require('./routes/trackingRoutes');
-const healthRoutes = require('./routes/healthRoutes');
 const { errorHandler, AppError } = require('../shared/utils/errorHandler');
 const mq = require('../shared/utils/messageQueue');
 
 const promMid = require('express-prometheus-middleware');
 const app = express();
+
+// Fast health check for Kubernetes probes
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: "ok", service: "tracking-service", timestamp: Date.now() });
+});
 
 app.use(promMid({
   metricsPath: '/metrics',
@@ -27,7 +31,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/tracking', trackingRoutes);
-app.use('/health', healthRoutes);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Route not found: ${req.originalUrl}`, 404));

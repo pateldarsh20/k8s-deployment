@@ -6,10 +6,14 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const { authenticateToken } = require('./middleware/auth');
 const proxyRoutes = require('./routes/proxy');
-const healthRoutes = require('./routes/health');
 
 const promMid = require('express-prometheus-middleware');
 const app = express();
+
+// Fast health check for Kubernetes probes
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: "ok", service: "api-gateway", timestamp: Date.now() });
+});
 
 app.use(promMid({
   metricsPath: '/metrics',
@@ -45,9 +49,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logging
 app.use(morgan('combined'));
-
-// Health check (no auth required)
-app.use('/health', healthRoutes);
 
 // Welcome route (no auth required)
 app.get('/', (req, res) => {

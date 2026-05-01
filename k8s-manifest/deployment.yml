@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: pateldarsh21/habit-tracker:user-service-v2
+          image: pateldarsh21/habit-tracker:user-service-v3
           ports:
             - containerPort: 3001
           resources:
@@ -26,15 +26,34 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          # ========== STARTUP PROBE ==========
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 2
+          # ========== READINESS PROBE ==========
           readinessProbe:
             httpGet:
               path: /health
               port: 3001
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 0
+            periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
+          # ========== LIVENESS PROBE ==========
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 3
           env:
             - name: NODE_ENV
               value: "production"
@@ -49,14 +68,8 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                - sh
-                - -c
-                - "sleep 10"
-      terminationGracePeriodSeconds: 45
+      # NO lifecycle.preStop
+      # NO terminationGracePeriodSeconds
 
 ---
 # ==================== HABIT SERVICE ====================
@@ -76,7 +89,7 @@ spec:
     spec:
       containers:
         - name: habit-service
-          image: pateldarsh21/habit-tracker:habit-service-v2
+          image: pateldarsh21/habit-tracker:habit-service-v3
           ports:
             - containerPort: 3002
           resources:
@@ -86,17 +99,31 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
-          # ========== READINESS PROBE ADDED ==========
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 2
           readinessProbe:
             httpGet:
               path: /health
               port: 3002
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 0
+            periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
-          # ===========================================
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 3
           env:
             - name: NODE_ENV
               value: "production"
@@ -111,14 +138,6 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                - sh
-                - -c
-                - "sleep 10"
-      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== TRACKING SERVICE ====================
@@ -138,7 +157,7 @@ spec:
     spec:
       containers:
         - name: tracking-service
-          image: pateldarsh21/habit-tracker:tracking-service-v2
+          image: pateldarsh21/habit-tracker:tracking-service-v3
           ports:
             - containerPort: 3003
           resources:
@@ -148,17 +167,31 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
-          # ========== READINESS PROBE ADDED ==========
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 2
           readinessProbe:
             httpGet:
               path: /health
               port: 3003
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 0
+            periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
-          # ===========================================
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 3
           env:
             - name: NODE_ENV
               value: "production"
@@ -173,14 +206,6 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                - sh
-                - -c
-                - "sleep 10"
-      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== ANALYTICS SERVICE ====================
@@ -200,7 +225,7 @@ spec:
     spec:
       containers:
         - name: analytics-service
-          image: pateldarsh21/habit-tracker:analytics-service-v2
+          image: pateldarsh21/habit-tracker:analytics-service-v3
           ports:
             - containerPort: 3004
           resources:
@@ -210,17 +235,31 @@ spec:
             limits:
               cpu: "1000m"
               memory: "512Mi"
-          # ========== READINESS PROBE ADDED ==========
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 3
           readinessProbe:
             httpGet:
               path: /health
               port: 3004
-            initialDelaySeconds: 10
+            initialDelaySeconds: 0
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
             successThreshold: 1
-          # ===========================================
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 45
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
           env:
             - name: NODE_ENV
               value: "production"
@@ -235,14 +274,6 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                - sh
-                - -c
-                - "sleep 30"
-      terminationGracePeriodSeconds: 90
 
 ---
 # ==================== NOTIFICATION SERVICE ====================
@@ -262,7 +293,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: pateldarsh21/habit-tracker:notification-service-v2
+          image: pateldarsh21/habit-tracker:notification-service-v3
           ports:
             - containerPort: 3005
           resources:
@@ -272,17 +303,31 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
-          # ========== READINESS PROBE ADDED ==========
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3005
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 2
           readinessProbe:
             httpGet:
               path: /health
               port: 3005
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 0
+            periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
-          # ===========================================
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3005
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 3
           env:
             - name: NODE_ENV
               value: "production"
@@ -297,14 +342,6 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                - sh
-                - -c
-                - "sleep 10"
-      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== API GATEWAY ====================
@@ -324,7 +361,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: pateldarsh21/habit-tracker:api-gateway-v5
+          image: pateldarsh21/habit-tracker:api-gateway-v6
           ports:
             - containerPort: 3000
           resources:
@@ -334,17 +371,31 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
-          # ========== READINESS PROBE ADDED ==========
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 2
           readinessProbe:
             httpGet:
               path: /health
               port: 3000
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 0
+            periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
-          # ===========================================
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 3
           env:
             - name: NODE_ENV
               value: "production"
@@ -375,14 +426,6 @@ spec:
                 configMapKeyRef:
                   name: habit-tracker-config
                   key: RATE_LIMIT_MAX_REQUESTS
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                - sh
-                - -c
-                - "sleep 15"
-      terminationGracePeriodSeconds: 60
 
 ---
 # ==================== FRONTEND ====================
@@ -412,22 +455,28 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
-          # ========== READINESS PROBE ADDED ==========
+          startupProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 30
+            timeoutSeconds: 2
           readinessProbe:
             httpGet:
               path: /
               port: 3000
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 0
+            periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
-          # ===========================================
-          lifecycle:
-            preStop:
-              exec:
-                command:
-                - sh
-                - -c
-                - "sleep 5"
-      terminationGracePeriodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 3

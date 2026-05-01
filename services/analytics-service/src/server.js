@@ -3,13 +3,17 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
 const analyticsRoutes = require('./routes/analyticsRoutes');
-const healthRoutes = require('./routes/healthRoutes');
 const { errorHandler, AppError } = require('../shared/utils/errorHandler');
 const mq = require('../shared/utils/messageQueue');
 const { setupConsumers } = require('./services/eventConsumer');
 
 const promMid = require('express-prometheus-middleware');
 const app = express();
+
+// Fast health check for Kubernetes probes
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: "ok", service: "analytics-service", timestamp: Date.now() });
+});
 
 app.use(promMid({
   metricsPath: '/metrics',
@@ -28,7 +32,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/analytics', analyticsRoutes);
-app.use('/health', healthRoutes);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Route not found: ${req.originalUrl}`, 404));

@@ -3,12 +3,16 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
-const healthRoutes = require('./routes/healthRoutes');
 const { errorHandler, AppError } = require('../shared/utils/errorHandler');
 const mq = require('../shared/utils/messageQueue');
 
 const promMid = require('express-prometheus-middleware');
 const app = express();
+
+// Fast health check for Kubernetes probes
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: "ok", service: "user-service", timestamp: Date.now() });
+});
 
 app.use(promMid({
   metricsPath: '/metrics',
@@ -30,7 +34,6 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api', authRoutes);
-app.use('/health', healthRoutes);
 
 // 404 handler
 app.all('*', (req, res, next) => {

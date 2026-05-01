@@ -2,34 +2,34 @@
 import subprocess
 import sys
 
-SERVICES = [
-    "user-service",
-    "habit-service",
-    "tracking-service",
-    "analytics-service",
-    "notification-service",
-    "api-gateway",
-    "frontend"
-]
-
 IMAGE_PREFIX = "pateldarsh21/habit-tracker"
+
+# Format: (service_name, new_version_tag, dockerfile_path)
+# Only include services that need to be built/pushed
+SERVICES_TO_BUILD = [
+    ("user-service",         "v3", "services/user-service/Dockerfile"),
+    ("habit-service",        "v3", "services/habit-service/Dockerfile"),
+    ("tracking-service",     "v3", "services/tracking-service/Dockerfile"),
+    ("analytics-service",    "v3", "services/analytics-service/Dockerfile"),
+    ("notification-service", "v3", "services/notification-service/Dockerfile"),
+    ("api-gateway",          "v6", "services/api-gateway/Dockerfile"),
+]
 
 def run(cmd, cwd=None):
     print(f"> {cmd}")
     result = subprocess.run(cmd, shell=True, cwd=cwd)
     if result.returncode != 0:
-        print(f"Failed: {cmd}")
+        print(f"❌ Failed: {cmd}")
         sys.exit(1)
 
 def build_and_push():
-    for service in SERVICES:
-        image = f"{IMAGE_PREFIX}:{service}-v1"
-        dockerfile = f"services/{service}/Dockerfile" if service != "frontend" else "frontend/Dockerfile"
-        
-        print(f"\n=== Building {service} ===")
+    for service, version, dockerfile in SERVICES_TO_BUILD:
+        image = f"{IMAGE_PREFIX}:{service}-{version}"
+        print(f"\n=== Building {service} as {image} ===")
         run(f"docker build -t {image} -f {dockerfile} .")
         run(f"docker push {image}")
+        print(f"✅ {image} pushed successfully")
 
 if __name__ == "__main__":
     build_and_push()
-    print("\nDone!")
+    print("\n✅ All images built and pushed!")
