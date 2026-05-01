@@ -15,6 +15,12 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: "ok", service: "api-gateway", timestamp: Date.now() });
 });
 
+app.get('/crash', (req, res) => {
+  console.log('Crashing pod...');
+  res.send('Pod crashing now');
+  process.exit(1);
+});
+
 app.use(promMid({
   metricsPath: '/metrics',
   collectDefaultMetrics: true,

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: pateldarsh21/habit-tracker:user-service-v3
+          image: pateldarsh21/habit-tracker:user-service-v4
           ports:
             - containerPort: 3001
           resources:
@@ -89,7 +89,7 @@ spec:
     spec:
       containers:
         - name: habit-service
-          image: pateldarsh21/habit-tracker:habit-service-v3
+          image: pateldarsh21/habit-tracker:habit-service-v4
           ports:
             - containerPort: 3002
           resources:
@@ -157,7 +157,7 @@ spec:
     spec:
       containers:
         - name: tracking-service
-          image: pateldarsh21/habit-tracker:tracking-service-v3
+          image: pateldarsh21/habit-tracker:tracking-service-v4
           ports:
             - containerPort: 3003
           resources:
@@ -225,7 +225,7 @@ spec:
     spec:
       containers:
         - name: analytics-service
-          image: pateldarsh21/habit-tracker:analytics-service-v3
+          image: pateldarsh21/habit-tracker:analytics-service-v4
           ports:
             - containerPort: 3004
           resources:
@@ -293,7 +293,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: pateldarsh21/habit-tracker:notification-service-v3
+          image: pateldarsh21/habit-tracker:notification-service-v4
           ports:
             - containerPort: 3005
           resources:
@@ -361,7 +361,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: pateldarsh21/habit-tracker:api-gateway-v6
+          image: pateldarsh21/habit-tracker:api-gateway-v7
           ports:
             - containerPort: 3000
           resources:
