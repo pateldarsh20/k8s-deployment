@@ -10,22 +10,22 @@ const proxyRoutes = require('./routes/proxy');
 const promMid = require('express-prometheus-middleware');
 const app = express();
 
-// Fast health check for Kubernetes probes
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: "ok", service: "api-gateway", timestamp: Date.now() });
-});
-
-app.get('/crash', (req, res) => {
-  console.log('Crashing pod...');
-  res.send('Pod crashing now');
-  process.exit(1);
-});
-
 app.use(promMid({
   metricsPath: '/metrics',
   collectDefaultMetrics: true,
   requestDurationBuckets: [0.1, 0.5, 1, 1.5, 2, 3, 5]
 }));
+
+// Fast health check for Kubernetes probes
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: "ok", service: "api-gateway", timestamp: Date.now() });
+});
+
+app.get('/api/gateway/crash', (req, res) => {
+  console.log('Crashing pod...');
+  res.send('Pod crashing now');
+  process.exit(1);
+});
 const PORT = process.env.PORT || 3000;
 
 // Security middleware

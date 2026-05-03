@@ -97,11 +97,14 @@ kind: Service
 metadata:
   name: user-service
   namespace: habit-tracker
+  labels:
+    metrics: "true"
 spec:
   selector:
     app: user-service
   ports:
-    - port: 3001
+    - name: http
+      port: 3001
       targetPort: 3001
 
 ---
@@ -110,11 +113,14 @@ kind: Service
 metadata:
   name: habit-service
   namespace: habit-tracker
+  labels:
+    metrics: "true"
 spec:
   selector:
     app: habit-service
   ports:
-    - port: 3002
+    - name: http
+      port: 3002
       targetPort: 3002
 
 ---
@@ -123,11 +129,14 @@ kind: Service
 metadata:
   name: tracking-service
   namespace: habit-tracker
+  labels:
+    metrics: "true"
 spec:
   selector:
     app: tracking-service
   ports:
-    - port: 3003
+    - name: http
+      port: 3003
       targetPort: 3003
 
 ---
@@ -136,11 +145,14 @@ kind: Service
 metadata:
   name: analytics-service
   namespace: habit-tracker
+  labels:
+    metrics: "true"
 spec:
   selector:
     app: analytics-service
   ports:
-    - port: 3004
+    - name: http
+      port: 3004
       targetPort: 3004
 
 ---
@@ -149,11 +161,14 @@ kind: Service
 metadata:
   name: notification-service
   namespace: habit-tracker
+  labels:
+    metrics: "true"
 spec:
   selector:
     app: notification-service
   ports:
-    - port: 3005
+    - name: http
+      port: 3005
       targetPort: 3005
 
 ---
@@ -163,12 +178,15 @@ kind: Service
 metadata:
   name: api-gateway
   namespace: habit-tracker
+  labels:
+    metrics: "true"
 spec:
   type: NodePort
   selector:
     app: api-gateway
   ports:
-    - port: 3000
+    - name: http
+      port: 3000
       targetPort: 3000
       nodePort: 30080
 
@@ -179,11 +197,14 @@ kind: Service
 metadata:
   name: frontend
   namespace: habit-tracker
+  labels:
+    metrics: "true"
 spec:
   type: NodePort
   selector:
     app: frontend
   ports:
-    - port: 3000
+    - name: http
+      port: 3000
       targetPort: 3000
       nodePort: 30090
