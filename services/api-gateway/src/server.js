@@ -68,7 +68,12 @@ app.get('/', (req, res) => {
 });
 
 // Authentication middleware (applied before proxy)
-app.use(authenticateToken);
+app.use((req, res, next) => {
+  if (req.path.endsWith('/crash')) {
+    return next();
+  }
+  return authenticateToken(req, res, next);
+});
 
 // API Documentation route
 app.get('/api/docs', (req, res) => {

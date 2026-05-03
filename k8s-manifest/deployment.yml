@@ -361,7 +361,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: pateldarsh21/habit-tracker:api-gateway-v9
+          image: pateldarsh21/habit-tracker:api-gateway-v10
           ports:
             - containerPort: 3000
           resources:

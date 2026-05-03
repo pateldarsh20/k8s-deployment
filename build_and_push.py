@@ -7,12 +7,7 @@ IMAGE_PREFIX = "pateldarsh21/habit-tracker"
 # Format: (service_name, new_version_tag, dockerfile_path)
 # Only include services that need to be built/pushed
 SERVICES_TO_BUILD = [
-    ("user-service",         "v6", "services/user-service/Dockerfile"),
-    ("habit-service",        "v6", "services/habit-service/Dockerfile"),
-    ("tracking-service",     "v6", "services/tracking-service/Dockerfile"),
-    ("analytics-service",    "v6", "services/analytics-service/Dockerfile"),
-    ("notification-service", "v6", "services/notification-service/Dockerfile"),
-    ("api-gateway",          "v9", "services/api-gateway/Dockerfile"),
+    ("api-gateway",          "v10", "services/api-gateway/Dockerfile"),
 ]
 
 def run(cmd, cwd=None):
