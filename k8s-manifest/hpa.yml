@@ -215,20 +215,20 @@ spec:
       target:
         type: Utilization
         averageUtilization: 80
-  # - type: Pods
-  #   pods:
-  #     metric:
-  #       name: http_requests_per_second
-  #     target:
-  #       type: AverageValue
-  #       averageValue: 150
-  # - type: Pods
-  #   pods:
-  #     metric:
-  #       name: http_request_duration_p95_ms
-  #     target:
-  #       type: AverageValue
-  #       averageValue: 300
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: 150
+  - type: Pods
+    pods:
+      metric:
+        name: http_request_duration_p95_ms
+      target:
+        type: AverageValue
+        averageValue: 300
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
