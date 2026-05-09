@@ -6,6 +6,7 @@ metadata:
   name: user-service
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 5
   selector:
     matchLabels:
       app: user-service
@@ -129,6 +130,7 @@ metadata:
   name: habit-service
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 5
   selector:
     matchLabels:
       app: habit-service
@@ -231,6 +233,7 @@ metadata:
   name: tracking-service
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 5
   selector:
     matchLabels:
       app: tracking-service
@@ -333,6 +336,7 @@ metadata:
   name: analytics-service
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 5
   selector:
     matchLabels:
       app: analytics-service
@@ -438,6 +442,7 @@ metadata:
   name: notification-service
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 5
   selector:
     matchLabels:
       app: notification-service
@@ -540,6 +545,7 @@ metadata:
   name: api-gateway
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 5
   selector:
     matchLabels:
       app: api-gateway
@@ -661,6 +667,7 @@ metadata:
   name: frontend
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 5
   selector:
     matchLabels:
       app: frontend

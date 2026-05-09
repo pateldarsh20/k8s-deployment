@@ -6,6 +6,7 @@ metadata:
   name: rabbitmq
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -110,6 +111,7 @@ metadata:
   name: mongodb-users
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -217,6 +219,7 @@ metadata:
   name: mongodb-habits
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -324,6 +327,7 @@ metadata:
   name: mongodb-tracking
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -431,6 +435,7 @@ metadata:
   name: mongodb-analytics
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -538,6 +543,7 @@ metadata:
   name: mongodb-notifications
   namespace: habit-tracker
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
