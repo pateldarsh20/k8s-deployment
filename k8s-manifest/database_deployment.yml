@@ -15,6 +15,7 @@ spec:
       labels:
         app: rabbitmq
     spec:
+      restartPolicy: Always
       containers:
         - name: rabbitmq
           image: rabbitmq:3-management-alpine
@@ -118,6 +119,7 @@ spec:
       labels:
         app: mongodb-users
     spec:
+      restartPolicy: Always
       containers:
         - name: mongodb
           image: mongo:7
@@ -224,6 +226,7 @@ spec:
       labels:
         app: mongodb-habits
     spec:
+      restartPolicy: Always
       containers:
         - name: mongodb
           image: mongo:7
@@ -330,6 +333,7 @@ spec:
       labels:
         app: mongodb-tracking
     spec:
+      restartPolicy: Always
       containers:
         - name: mongodb
           image: mongo:7
@@ -436,6 +440,7 @@ spec:
       labels:
         app: mongodb-analytics
     spec:
+      restartPolicy: Always
       containers:
         - name: mongodb
           image: mongo:7
@@ -542,6 +547,7 @@ spec:
       labels:
         app: mongodb-notifications
     spec:
+      restartPolicy: Always
       containers:
         - name: mongodb
           image: mongo:7
