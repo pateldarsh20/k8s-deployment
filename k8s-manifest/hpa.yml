@@ -1,18 +1,28 @@
 ---
 # ==================== API GATEWAY HPA ====================
-# Critical service - needs higher availability
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: api-gateway-hpa
   namespace: habit-tracker
 spec:
+  # =========================================
+  # SECTION 1: SCALE TARGET REFERENCE
+  # =========================================
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: api-gateway
-  minReplicas: 3                   
+  
+  # =========================================
+  # SECTION 2: MIN/MAX REPLICAS
+  # =========================================
+  minReplicas: 3
   maxReplicas: 15
+  
+  # =========================================
+  # SECTION 3: METRICS
+  # =========================================
   metrics:
   - type: Resource
     resource:
@@ -28,7 +38,7 @@ spec:
         averageUtilization: 80
   - type: Pods
     pods:
-      metric:         
+      metric:
         name: http_requests_per_second
       target:
         type: AverageValue
@@ -40,7 +50,12 @@ spec:
       target:
         type: AverageValue
         averageValue: 300
+  
+  # =========================================
+  # SECTION 4: SCALING BEHAVIOR
+  # =========================================
   behavior:
+    # ========== SCALE DOWN ==========
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
@@ -51,6 +66,7 @@ spec:
         value: 1
         periodSeconds: 60
       selectPolicy: Min
+    # ========== SCALE UP ==========
     scaleUp:
       stabilizationWindowSeconds: 0
       policies:
@@ -70,12 +86,23 @@ metadata:
   name: user-service-hpa
   namespace: habit-tracker
 spec:
+  # =========================================
+  # SECTION 1: SCALE TARGET REFERENCE
+  # =========================================
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: user-service
+  
+  # =========================================
+  # SECTION 2: MIN/MAX REPLICAS
+  # =========================================
   minReplicas: 2
   maxReplicas: 10
+  
+  # =========================================
+  # SECTION 3: METRICS
+  # =========================================
   metrics:
   - type: Resource
     resource:
@@ -103,6 +130,10 @@ spec:
       target:
         type: AverageValue
         averageValue: 300
+  
+  # =========================================
+  # SECTION 4: SCALING BEHAVIOR
+  # =========================================
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -133,12 +164,23 @@ metadata:
   name: habit-service-hpa
   namespace: habit-tracker
 spec:
+  # =========================================
+  # SECTION 1: SCALE TARGET REFERENCE
+  # =========================================
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: habit-service
+  
+  # =========================================
+  # SECTION 2: MIN/MAX REPLICAS
+  # =========================================
   minReplicas: 2
   maxReplicas: 10
+  
+  # =========================================
+  # SECTION 3: METRICS
+  # =========================================
   metrics:
   - type: Resource
     resource:
@@ -166,6 +208,10 @@ spec:
       target:
         type: AverageValue
         averageValue: 300
+  
+  # =========================================
+  # SECTION 4: SCALING BEHAVIOR
+  # =========================================
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -196,12 +242,23 @@ metadata:
   name: tracking-service-hpa
   namespace: habit-tracker
 spec:
+  # =========================================
+  # SECTION 1: SCALE TARGET REFERENCE
+  # =========================================
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: tracking-service
+  
+  # =========================================
+  # SECTION 2: MIN/MAX REPLICAS
+  # =========================================
   minReplicas: 2
   maxReplicas: 10
+  
+  # =========================================
+  # SECTION 3: METRICS
+  # =========================================
   metrics:
   - type: Resource
     resource:
@@ -229,6 +286,10 @@ spec:
       target:
         type: AverageValue
         averageValue: 300
+  
+  # =========================================
+  # SECTION 4: SCALING BEHAVIOR
+  # =========================================
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -253,19 +314,29 @@ spec:
 
 ---
 # ==================== ANALYTICS SERVICE HPA ====================
-
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: analytics-service-hpa
   namespace: habit-tracker
 spec:
+  # =========================================
+  # SECTION 1: SCALE TARGET REFERENCE
+  # =========================================
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: analytics-service
-  minReplicas: 2                    
-  maxReplicas: 9                    
+  
+  # =========================================
+  # SECTION 2: MIN/MAX REPLICAS
+  # =========================================
+  minReplicas: 2
+  maxReplicas: 9
+  
+  # =========================================
+  # SECTION 3: METRICS
+  # =========================================
   metrics:
   - type: Resource
     resource:
@@ -293,6 +364,10 @@ spec:
       target:
         type: AverageValue
         averageValue: 300
+  
+  # =========================================
+  # SECTION 4: SCALING BEHAVIOR
+  # =========================================
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -302,10 +377,10 @@ spec:
         periodSeconds: 120
       selectPolicy: Min
     scaleUp:
-      stabilizationWindowSeconds: 60     
+      stabilizationWindowSeconds: 60
       policies:
       - type: Pods
-        value: 1                        
+        value: 1
         periodSeconds: 60
       selectPolicy: Max
 
@@ -317,12 +392,23 @@ metadata:
   name: notification-service-hpa
   namespace: habit-tracker
 spec:
+  # =========================================
+  # SECTION 1: SCALE TARGET REFERENCE
+  # =========================================
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: notification-service
+  
+  # =========================================
+  # SECTION 2: MIN/MAX REPLICAS
+  # =========================================
   minReplicas: 2
   maxReplicas: 8
+  
+  # =========================================
+  # SECTION 3: METRICS
+  # =========================================
   metrics:
   - type: Resource
     resource:
@@ -350,6 +436,10 @@ spec:
       target:
         type: AverageValue
         averageValue: 300
+  
+  # =========================================
+  # SECTION 4: SCALING BEHAVIOR
+  # =========================================
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -374,19 +464,29 @@ spec:
 
 ---
 # ==================== FRONTEND HPA ====================
-# Frontend can scale wide because it serves static assets
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: frontend-hpa
   namespace: habit-tracker
 spec:
+  # =========================================
+  # SECTION 1: SCALE TARGET REFERENCE
+  # =========================================
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: frontend
+  
+  # =========================================
+  # SECTION 2: MIN/MAX REPLICAS
+  # =========================================
   minReplicas: 2
-  maxReplicas: 20                    # Frontend can scale more aggressively
+  maxReplicas: 20
+  
+  # =========================================
+  # SECTION 3: METRICS
+  # =========================================
   metrics:
   - type: Resource
     resource:
@@ -414,6 +514,10 @@ spec:
       target:
         type: AverageValue
         averageValue: 300
+  
+  # =========================================
+  # SECTION 4: SCALING BEHAVIOR
+  # =========================================
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -429,7 +533,7 @@ spec:
       stabilizationWindowSeconds: 0
       policies:
       - type: Percent
-        value: 200                  
+        value: 200
         periodSeconds: 15
       - type: Pods
         value: 4

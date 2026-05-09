@@ -19,41 +19,84 @@ spec:
           image: pateldarsh21/habit-tracker:user-service-v6
           ports:
             - containerPort: 3001
+          
+          # =========================================
+          # FEATURE 1: RESOURCES (Requests & Limits)
+          # =========================================
+          # Purpose: Guarantees minimum CPU/Memory and sets maximum limits
+          # Without this: Pod can consume all node resources, crash other pods
           resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
+              cpu: "100m"      # Guaranteed 0.1 CPU core
+              memory: "128Mi"  # Guaranteed 128 MB RAM
             limits:
-              cpu: "500m"
-              memory: "256Mi"
-          # ========== STARTUP PROBE ==========
+              cpu: "500m"      # Max 0.5 CPU core (can't exceed)
+              memory: "256Mi"  # Max 256 MB RAM (will OOM kill if exceeded)
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
+          # Purpose: Gives slow-starting apps time to initialize
+          # Without this: Liveness probe may kill pod during slow startup
+          # When it runs: Only during pod startup
+          # On failure: Pod restarts
           startupProbe:
             httpGet:
               path: /health
               port: 3001
-            initialDelaySeconds: 0
-            periodSeconds: 5
-            failureThreshold: 30
-            timeoutSeconds: 2
-          # ========== READINESS PROBE ==========
+            initialDelaySeconds: 0      # Start checking immediately
+            periodSeconds: 5             # Check every 5 seconds
+            failureThreshold: 30         # Allow 30 failures (150 seconds total)
+            timeoutSeconds: 2            # Must respond within 2 seconds
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
+          # Purpose: Determines if pod can receive traffic
+          # Without this: Traffic sent to unprepared pods → 502 errors
+          # When it runs: Forever (after startupProbe succeeds)
+          # On failure: Traffic stops, pod NOT restarted
           readinessProbe:
             httpGet:
               path: /health
               port: 3001
-            initialDelaySeconds: 0
-            periodSeconds: 10
-            timeoutSeconds: 2
-            failureThreshold: 3
-            successThreshold: 1
-          # ========== LIVENESS PROBE ==========
+            initialDelaySeconds: 0       # startupProbe handles initial delay
+            periodSeconds: 10            # Check every 10 seconds
+            timeoutSeconds: 2            # Must respond within 2 seconds
+            failureThreshold: 3          # 3 failures = Not Ready (traffic stops)
+            successThreshold: 1          # 1 success = Ready (traffic resumes)
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
+          # Purpose: Detects and restarts hung/dead pods
+          # Without this: Hang pod runs forever, never recovers
+          # When it runs: Forever (after startupProbe succeeds)
+          # On failure: Pod RESTARTS
           livenessProbe:
             httpGet:
               path: /health
               port: 3001
-            initialDelaySeconds: 30
-            periodSeconds: 30
-            timeoutSeconds: 2
-            failureThreshold: 3
+            initialDelaySeconds: 30      # Wait 30s after startup before starting
+            periodSeconds: 30            # Check every 30 seconds
+            timeoutSeconds: 2            # Must respond within 2 seconds
+            failureThreshold: 3          # 3 failures = Pod restarts
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          # Purpose: Runs custom code BEFORE pod terminates
+          # Without this: In-flight requests get interrupted → 502 errors
+          # When it runs: Immediately after termination signal
+          # What it does: Sleeps to finish existing requests
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 10"            # Wait 10 seconds for requests to finish
+          
           env:
             - name: NODE_ENV
               value: "production"
@@ -68,8 +111,14 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
-      # NO lifecycle.preStop
-      # NO terminationGracePeriodSeconds
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      # Purpose: Total time Kubernetes waits before force kill
+      # Without this: Default 30s may not be enough (pod gets force killed)
+      # Formula: Must be > preStop sleep + app shutdown time
+      terminationGracePeriodSeconds: 45   # Total: 10s (preStop) + 35s buffer
 
 ---
 # ==================== HABIT SERVICE ====================
@@ -92,6 +141,10 @@ spec:
           image: pateldarsh21/habit-tracker:habit-service-v6
           ports:
             - containerPort: 3002
+          
+          # =========================================
+          # FEATURE 1: RESOURCES
+          # =========================================
           resources:
             requests:
               cpu: "100m"
@@ -99,6 +152,10 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             httpGet:
               path: /health
@@ -107,6 +164,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 2
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             httpGet:
               path: /health
@@ -116,6 +177,10 @@ spec:
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             httpGet:
               path: /health
@@ -124,6 +189,18 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 2
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 10"
+          
           env:
             - name: NODE_ENV
               value: "production"
@@ -138,6 +215,11 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== TRACKING SERVICE ====================
@@ -160,6 +242,10 @@ spec:
           image: pateldarsh21/habit-tracker:tracking-service-v6
           ports:
             - containerPort: 3003
+          
+          # =========================================
+          # FEATURE 1: RESOURCES
+          # =========================================
           resources:
             requests:
               cpu: "100m"
@@ -167,6 +253,10 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             httpGet:
               path: /health
@@ -175,6 +265,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 2
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             httpGet:
               path: /health
@@ -184,6 +278,10 @@ spec:
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             httpGet:
               path: /health
@@ -192,6 +290,18 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 2
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 10"
+          
           env:
             - name: NODE_ENV
               value: "production"
@@ -206,6 +316,11 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== ANALYTICS SERVICE ====================
@@ -228,13 +343,21 @@ spec:
           image: pateldarsh21/habit-tracker:analytics-service-v6
           ports:
             - containerPort: 3004
+          
+          # =========================================
+          # FEATURE 1: RESOURCES (Higher for analytics)
+          # =========================================
           resources:
             requests:
-              cpu: "200m"
-              memory: "256Mi"
+              cpu: "200m"      # Higher CPU for batch processing
+              memory: "256Mi"  # Higher memory
             limits:
-              cpu: "1000m"
+              cpu: "1000m"     # Can burst to 1 full core
               memory: "512Mi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE (Slower for analytics)
+          # =========================================
           startupProbe:
             httpGet:
               path: /health
@@ -242,7 +365,11 @@ spec:
             initialDelaySeconds: 0
             periodSeconds: 5
             failureThreshold: 30
-            timeoutSeconds: 3
+            timeoutSeconds: 3    # Longer timeout
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             httpGet:
               path: /health
@@ -252,14 +379,33 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE (Delayed for analytics)
+          # =========================================
           livenessProbe:
             httpGet:
               path: /health
               port: 3004
-            initialDelaySeconds: 45
+            initialDelaySeconds: 45   # Longer delay for heavy service
             periodSeconds: 30
             timeoutSeconds: 3
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK (Longer for analytics)
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - |
+                  echo "🛑 Finishing analytics batch processing..."
+                  sleep 30
+                  echo "✅ Ready to exit"
+          
           env:
             - name: NODE_ENV
               value: "production"
@@ -274,6 +420,11 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD (Longer for analytics)
+      # =========================================
+      terminationGracePeriodSeconds: 90
 
 ---
 # ==================== NOTIFICATION SERVICE ====================
@@ -296,6 +447,10 @@ spec:
           image: pateldarsh21/habit-tracker:notification-service-v6
           ports:
             - containerPort: 3005
+          
+          # =========================================
+          # FEATURE 1: RESOURCES
+          # =========================================
           resources:
             requests:
               cpu: "100m"
@@ -303,6 +458,10 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             httpGet:
               path: /health
@@ -311,6 +470,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 2
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             httpGet:
               path: /health
@@ -320,6 +483,10 @@ spec:
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             httpGet:
               path: /health
@@ -328,6 +495,18 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 2
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - "sleep 10"
+          
           env:
             - name: NODE_ENV
               value: "production"
@@ -342,6 +521,11 @@ spec:
                   key: JWT_SECRET
             - name: RABBITMQ_URL
               value: "amqp://guest:guest@rabbitmq:5672"
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      terminationGracePeriodSeconds: 45
 
 ---
 # ==================== API GATEWAY ====================
@@ -364,6 +548,10 @@ spec:
           image: pateldarsh21/habit-tracker:api-gateway-v10
           ports:
             - containerPort: 3000
+          
+          # =========================================
+          # FEATURE 1: RESOURCES
+          # =========================================
           resources:
             requests:
               cpu: "100m"
@@ -371,6 +559,10 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             httpGet:
               path: /health
@@ -379,6 +571,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 2
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             httpGet:
               path: /health
@@ -388,6 +584,10 @@ spec:
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             httpGet:
               path: /health
@@ -396,6 +596,21 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 2
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK (Longer for API gateway)
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - |
+                  echo "🛑 Draining API gateway connections..."
+                  sleep 15
+                  echo "✅ Ready to exit"
+          
           env:
             - name: NODE_ENV
               value: "production"
@@ -426,6 +641,11 @@ spec:
                 configMapKeyRef:
                   name: habit-tracker-config
                   key: RATE_LIMIT_MAX_REQUESTS
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD (Longer for API gateway)
+      # =========================================
+      terminationGracePeriodSeconds: 60
 
 ---
 # ==================== FRONTEND ====================
@@ -448,6 +668,10 @@ spec:
           image: pateldarsh21/habit-tracker:frontend-v3
           ports:
             - containerPort: 3000
+          
+          # =========================================
+          # FEATURE 1: RESOURCES
+          # =========================================
           resources:
             requests:
               cpu: "100m"
@@ -455,6 +679,10 @@ spec:
             limits:
               cpu: "500m"
               memory: "256Mi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE (Uses / path for static frontend)
+          # =========================================
           startupProbe:
             httpGet:
               path: /
@@ -463,6 +691,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 2
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             httpGet:
               path: /
@@ -472,6 +704,10 @@ spec:
             timeoutSeconds: 2
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             httpGet:
               path: /
@@ -480,3 +716,15 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 2
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK (NOT NEEDED for static frontend)
+          # =========================================
+          # No preStop hook - static files don't need graceful shutdown
+          
+          env: []
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD (Shorter for frontend)
+      # =========================================
+      terminationGracePeriodSeconds: 30

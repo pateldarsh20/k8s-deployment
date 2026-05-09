@@ -23,6 +23,10 @@ spec:
               name: amqp
             - containerPort: 15672
               name: mgmt
+          
+          # =========================================
+          # FEATURE 1: RESOURCES (Requests & Limits)
+          # =========================================
           resources:
             requests:
               cpu: "100m"
@@ -30,7 +34,10 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
-          # ========== STARTUP PROBE ==========
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             exec:
               command:
@@ -40,7 +47,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 5
-          # ========== READINESS PROBE ==========
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             exec:
               command:
@@ -51,7 +61,10 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
             successThreshold: 1
-          # ========== LIVENESS PROBE ==========
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             exec:
               command:
@@ -61,11 +74,32 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - |
+                  echo "🛑 Stopping RabbitMQ gracefully..."
+                  rabbitmqctl stop_app
+                  sleep 5
+                  echo "✅ RabbitMQ stopped"
+          
           env:
             - name: RABBITMQ_DEFAULT_USER
               value: "guest"
             - name: RABBITMQ_DEFAULT_PASS
               value: "guest"
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      terminationGracePeriodSeconds: 90
 
 ---
 # ==================== MONGODB USERS ====================
@@ -89,6 +123,10 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          
+          # =========================================
+          # FEATURE 1: RESOURCES (Requests & Limits)
+          # =========================================
           resources:
             requests:
               cpu: "250m"
@@ -96,7 +134,10 @@ spec:
             limits:
               cpu: "1000m"
               memory: "1Gi"
-          # ========== STARTUP PROBE ==========
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             exec:
               command:
@@ -107,7 +148,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 5
-          # ========== READINESS PROBE ==========
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             exec:
               command:
@@ -119,7 +163,10 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
             successThreshold: 1
-          # ========== LIVENESS PROBE ==========
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             exec:
               command:
@@ -130,12 +177,35 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - |
+                  echo "🛑 Flushing MongoDB writes to disk..."
+                  mongo --eval "db.fsyncLock()"
+                  sleep 10
+                  mongo --eval "db.fsyncUnlock()"
+                  echo "✅ MongoDB shutdown complete"
+          
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
+      
       volumes:
         - name: mongo-data
           emptyDir: {}
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      terminationGracePeriodSeconds: 120
 
 ---
 # ==================== MONGODB HABITS ====================
@@ -159,6 +229,10 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          
+          # =========================================
+          # FEATURE 1: RESOURCES
+          # =========================================
           resources:
             requests:
               cpu: "250m"
@@ -166,6 +240,10 @@ spec:
             limits:
               cpu: "1000m"
               memory: "1Gi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             exec:
               command:
@@ -176,6 +254,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 5
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             exec:
               command:
@@ -187,6 +269,10 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             exec:
               command:
@@ -197,12 +283,35 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - |
+                  echo "🛑 Flushing MongoDB writes to disk..."
+                  mongo --eval "db.fsyncLock()"
+                  sleep 10
+                  mongo --eval "db.fsyncUnlock()"
+                  echo "✅ MongoDB shutdown complete"
+          
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
+      
       volumes:
         - name: mongo-data
           emptyDir: {}
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      terminationGracePeriodSeconds: 120
 
 ---
 # ==================== MONGODB TRACKING ====================
@@ -226,6 +335,10 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          
+          # =========================================
+          # FEATURE 1: RESOURCES
+          # =========================================
           resources:
             requests:
               cpu: "250m"
@@ -233,6 +346,10 @@ spec:
             limits:
               cpu: "1000m"
               memory: "1Gi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             exec:
               command:
@@ -243,6 +360,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 5
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             exec:
               command:
@@ -254,6 +375,10 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             exec:
               command:
@@ -264,12 +389,35 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - |
+                  echo "🛑 Flushing MongoDB writes to disk..."
+                  mongo --eval "db.fsyncLock()"
+                  sleep 10
+                  mongo --eval "db.fsyncUnlock()"
+                  echo "✅ MongoDB shutdown complete"
+          
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
+      
       volumes:
         - name: mongo-data
           emptyDir: {}
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      terminationGracePeriodSeconds: 120
 
 ---
 # ==================== MONGODB ANALYTICS ====================
@@ -293,6 +441,10 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          
+          # =========================================
+          # FEATURE 1: RESOURCES
+          # =========================================
           resources:
             requests:
               cpu: "250m"
@@ -300,6 +452,10 @@ spec:
             limits:
               cpu: "1000m"
               memory: "1Gi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             exec:
               command:
@@ -310,6 +466,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 5
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             exec:
               command:
@@ -321,6 +481,10 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             exec:
               command:
@@ -331,12 +495,35 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - |
+                  echo "🛑 Flushing MongoDB writes to disk..."
+                  mongo --eval "db.fsyncLock()"
+                  sleep 10
+                  mongo --eval "db.fsyncUnlock()"
+                  echo "✅ MongoDB shutdown complete"
+          
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
+      
       volumes:
         - name: mongo-data
           emptyDir: {}
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      terminationGracePeriodSeconds: 120
 
 ---
 # ==================== MONGODB NOTIFICATIONS ====================
@@ -360,6 +547,10 @@ spec:
           image: mongo:7
           ports:
             - containerPort: 27017
+          
+          # =========================================
+          # FEATURE 1: RESOURCES
+          # =========================================
           resources:
             requests:
               cpu: "250m"
@@ -367,6 +558,10 @@ spec:
             limits:
               cpu: "1000m"
               memory: "1Gi"
+          
+          # =========================================
+          # FEATURE 2: STARTUP PROBE
+          # =========================================
           startupProbe:
             exec:
               command:
@@ -377,6 +572,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 30
             timeoutSeconds: 5
+          
+          # =========================================
+          # FEATURE 3: READINESS PROBE
+          # =========================================
           readinessProbe:
             exec:
               command:
@@ -388,6 +587,10 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
             successThreshold: 1
+          
+          # =========================================
+          # FEATURE 4: LIVENESS PROBE
+          # =========================================
           livenessProbe:
             exec:
               command:
@@ -398,9 +601,32 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
+          
+          # =========================================
+          # FEATURE 5: PRE-STOP HOOK
+          # =========================================
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - sh
+                - -c
+                - |
+                  echo "🛑 Flushing MongoDB writes to disk..."
+                  mongo --eval "db.fsyncLock()"
+                  sleep 10
+                  mongo --eval "db.fsyncUnlock()"
+                  echo "✅ MongoDB shutdown complete"
+          
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
+      
       volumes:
         - name: mongo-data
           emptyDir: {}
+      
+      # =========================================
+      # FEATURE 6: TERMINATION GRACE PERIOD
+      # =========================================
+      terminationGracePeriodSeconds: 120
