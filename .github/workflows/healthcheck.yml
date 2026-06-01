@@ -1,0 +1,26 @@
+# .github/workflows/healthcheck.yml
+name: Daily health check
+
+on:
+  schedule:
+    # Every 5 mins - Health check
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check the web app health
+        run: |
+          echo "Checking the Health status"
+
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://k8s-design.vercel.app || echo "000")
+
+          if [ $response -eq 200 ]; then
+            echo "App is healthy! Status: $response"
+          else
+            echo "App might be down! Status: $response"
+          fi
